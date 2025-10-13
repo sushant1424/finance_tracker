@@ -35,9 +35,7 @@ export default function RootLayout({
           <footer className="bg-blue-50 py-12">
               <div className="container mx-auto px-4 text-center text-gray-600">
                 <p>&copy; {new Date().getFullYear()} Finance Tracker. All rights reserved.</p>
-                <p className="mt-2">
-                  Built with Next.js and Tailwind CSS.
-                </p>
+               
               </div>
           </footer>
 
