@@ -1,3 +1,4 @@
+import DashboardShell from '@/components/dashboard/DashboardShell';
 import React from 'react'
 
 interface MainLayoutProps {
@@ -6,7 +7,9 @@ interface MainLayoutProps {
 
 const MainLayout = ({children}: MainLayoutProps) => {
   return (
-    <div className = "container mx-auto my-32">{children}</div>
+    <DashboardShell>
+      {children}
+    </DashboardShell>
   )
 }
 
