@@ -22,6 +22,13 @@ const Header = async () => {
             />
         </Link>
 
+        {/* Center nav */}
+        <div className="hidden md:flex items-center gap-8 text-sm text-gray-700">
+          <Link href="#features" className="hover:text-blue-600">Features</Link>
+          <Link href="#pricing" className="hover:text-blue-600">Pricing</Link>
+          <Link href="#faq" className="hover:text-blue-600">FAQ</Link>
+        </div>
+
         <div className="flex items-center space-x-4">
             
             {/*User Actions After Login*/}
