@@ -1,9 +1,9 @@
 import React from 'react'
 
-const Dashboard = () => {
+const DashboardPage = () => {
   return (
-    <div>Dashboard Page</div>
+    <div className = "px-5">Dashboard Page</div>
   )
 }
 
-export default Dashboard
+export default DashboardPage
