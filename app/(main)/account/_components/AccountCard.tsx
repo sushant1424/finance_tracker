@@ -34,18 +34,26 @@ const AccountCard = ({ account }: AccountCardProps) => {
     }
 
      useEffect(() => {
-        if (updatedAccount?.success) {
-        toast.success("Default account updated successfully");
+        // Since updatedAccount could be undefined or an object, and to avoid type errors,
+        // check if updatedAccount exists and treat as type any for success property access
+        if ((updatedAccount as any)?.success) {
+            toast.success("Default account updated successfully");
         }
-    }, [updatedAccount]);
+     }, [updatedAccount]);
+
 
     useEffect(() => {
         if (error) {
-        toast.error(error.message || "Failed to update default account");
+            // If error is unknown type, safely check for message property
+            const errorMsg =
+                typeof error === "object" && error !== null && "message" in error
+                    ? (error as { message?: string }).message
+                    : undefined;
+            toast.error(errorMsg || "Failed to update default account");
         }
     }, [error]);
-  return (
-    <div>
+    return (
+        <div>
         <Card className="hover:shadow-md transition-shadow group relative">
             <Link href = {`/accountInfo/${id}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

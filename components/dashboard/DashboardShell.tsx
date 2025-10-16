@@ -4,6 +4,7 @@ import { Sidebar, SidebarBody, SidebarLink, useSidebar } from "@/components/ui/s
 import { motion } from "motion/react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, PlusCircle } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
@@ -52,6 +53,7 @@ const SidebarContent = () => {
 
 const RightPane: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { open } = useSidebar();
+  const pathname = usePathname();
   const [isDesktop, setIsDesktop] = React.useState(false);
 
   React.useEffect(() => {
@@ -62,14 +64,17 @@ const RightPane: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return () => mq.removeEventListener("change", update);
   }, []);
 
+  // Only show header on dashboard route
+  const isDashboardRoute = pathname === '/dashboard';
+
   return (
     <motion.div
       animate={{ paddingLeft: isDesktop ? (open ? 300 : 60) : 0 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
       className="w-full min-h-screen bg-neutral-100"
     >
-      <DashboardHeader />
-      <div className="px-6 py-6 bg-white min-h-[calc(100vh-64px)]">
+      {isDashboardRoute && <DashboardHeader />}
+      <div className={`px-6 py-6 bg-white ${isDashboardRoute ? 'min-h-[calc(100vh-64px)]' : 'min-h-screen'}`}>
         {children}
       </div>
     </motion.div>
