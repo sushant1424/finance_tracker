@@ -93,8 +93,9 @@ enum TransactionType {
 }
 
 enum AccountType {
-  CURRENT
   SAVINGS
+  INCOME
+  EXPENSE
 }
 
 enum TransactionStatus {

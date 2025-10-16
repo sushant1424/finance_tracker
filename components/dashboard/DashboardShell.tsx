@@ -12,7 +12,7 @@ const SidebarContent = () => {
   const links = useMemo(() => [
     { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-neutral-700"/> },
     { label: "Create Transaction", href: "/transaction/create", icon: <PlusCircle className="h-5 w-5 shrink-0 text-neutral-700"/> },
-    { label: "Transactions", href: "/transactions", icon: <ReceiptText className="h-5 w-5 shrink-0 text-neutral-700"/> },
+    { label: "Transactions", href: "/transaction", icon: <ReceiptText className="h-5 w-5 shrink-0 text-neutral-700"/> },
     { label: "Accounts", href: "/account", icon: <Wallet className="h-5 w-5 shrink-0 text-neutral-700"/> },
     { label: "Reports", href: "/reports", icon: <BarChart3 className="h-5 w-5 shrink-0 text-neutral-700"/> },
     { label: "Budget", href: "/budget", icon: <PiggyBank className="h-5 w-5 shrink-0 text-neutral-700"/> },
