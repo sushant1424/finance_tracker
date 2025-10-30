@@ -13,13 +13,7 @@ const Header = async () => {
     <div className = "fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <nav className="flex items-center justify-between container mx-auto px-2 py-4">
         <Link href="/">
-            <Image
-              src={"/image.png"}
-              alt="Welth Logo"
-              width={200}
-              height={60}
-              className="h-12 w-auto object-contain"
-            />
+            <span className="text-[25px] font-semibold tracking-wide text-neutral-800">welth</span>
         </Link>
 
         {/* Center nav */}

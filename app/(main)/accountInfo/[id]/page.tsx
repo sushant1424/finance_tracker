@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getAccountWithTransactions } from "@/actions/accounts";
 import { BarLoader } from "react-spinners";
 import { notFound } from "next/navigation";
+import TransactionTable from "../_components/transaction-table";
 
 interface AccountPageProps {
   params: {
@@ -45,6 +46,9 @@ export default async function AccountPage({ params }: AccountPageProps) {
       
 
       {/* Transactions Table */}
+      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea"/>}>
+        <TransactionTable transactions={transactions} />
+      </Suspense>
       
     </div>
   );
