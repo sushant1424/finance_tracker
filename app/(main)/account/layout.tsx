@@ -1,21 +1,26 @@
-import React, {Suspense} from 'react'
-import DashboardPage from './page'
-import { BarLoader } from 'react-spinners'
-import AccountPage from './page'
+import React from 'react'
+import { Breadcrumb } from '@/components/breadcrumb'
 
-const AccountLayout = () => {
+interface AccountLayoutProps {
+  children: React.ReactNode;
+}
+
+const AccountLayout = ({ children }: AccountLayoutProps) => {
   return (
-    <div className = "px-8 py-6 min-h-screen bg-gradient-to-b from-white to-gray-50">
-        <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
-                 Account
-            </h1>
+    <div className="space-y-6 pb-8">
+      <Breadcrumb />
+      
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">
+            Accounts
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your accounts
+          </p>
         </div>
-
-        {/* Account Page */}
-        <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea"/>}>
-            <AccountPage />
-        </Suspense>
+      </div>
+      {children}
     </div>
   )
 }

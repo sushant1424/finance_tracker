@@ -10,14 +10,45 @@ import useFetch from '@/hooks/use-fetch';
 import { bulkDeleteTransactions } from '@/actions/accounts';
 import { toast } from 'sonner';
 import { BarLoader } from 'react-spinners';
-import { Transaction, SortConfig } from './types';
-import { TableFilters } from './table-filters';
-import { TransactionTableHeader } from './table-header';
-import { TransactionRow } from './transaction-row';
+import { AllTransactionFilters } from './all-transaction-filters';
+import { AllTransactionTableHeader } from './all-transaction-table-header';
+import { AllTransactionRow } from './all-transaction-row';
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
-const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => {
+interface Account {
+  name: string;
+  type: string;
+}
+
+interface Transaction {
+  id: string;
+  date: string;
+  description: string;
+  type: "INCOME" | "EXPENSE";
+  category: string;
+  amount: number;
+  isRecurring?: boolean;
+  recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+  nextRecurringDate?: string;
+  account: Account;
+  accountId: string;
+}
+
+interface SortConfig {
+  field: string;
+  direction: "asc" | "desc";
+}
+
+interface AllTransactionsTableProps {
+  transactions: Transaction[];
+  accounts: { id: string; name: string; type: string }[];
+}
+
+const AllTransactionsTable: React.FC<AllTransactionsTableProps> = ({ 
+  transactions, 
+  accounts 
+}) => {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
@@ -27,6 +58,7 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [recurringFilter, setRecurringFilter] = useState("");
+  const [accountFilter, setAccountFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0]);
 
@@ -58,25 +90,24 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
     setSearchTerm("");
     setTypeFilter("");
     setRecurringFilter("");
+    setAccountFilter("");
     setCurrentPage(1);
   };
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    setSelectedIds([]); // Clear selections on page change
+    setSelectedIds([]);
   };
 
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
-    setCurrentPage(1); // Reset to first page when changing items per page
+    setCurrentPage(1);
     setSelectedIds([]);
   };
 
-  // Memoized filtered and sorted transactions
   const filteredAndSortedTransactions = useMemo(() => {
     let result = [...transactions];
 
-    // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       result = result.filter((transaction) =>
@@ -84,12 +115,10 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
       );
     }
 
-    // Apply type filter
     if (typeFilter) {
       result = result.filter((transaction) => transaction.type === typeFilter);
     }
 
-    // Apply recurring filter
     if (recurringFilter) {
       result = result.filter((transaction) => {
         if (recurringFilter === "recurring") return transaction.isRecurring;
@@ -97,7 +126,10 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
       });
     }
 
-    // Apply sorting
+    if (accountFilter) {
+      result = result.filter((transaction) => transaction.accountId === accountFilter);
+    }
+
     result.sort((a, b) => {
       let comparison = 0;
 
@@ -111,6 +143,9 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
         case "category":
           comparison = a.category.localeCompare(b.category);
           break;
+        case "account":
+          comparison = a.account.name.localeCompare(b.account.name);
+          break;
         default:
           comparison = 0;
       }
@@ -119,9 +154,8 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
     });
 
     return result;
-  }, [transactions, searchTerm, typeFilter, recurringFilter, sortConfig]);
+  }, [transactions, searchTerm, typeFilter, recurringFilter, accountFilter, sortConfig]);
 
-  // Pagination calculations
   const totalPages = Math.ceil(
     filteredAndSortedTransactions.length / itemsPerPage
   );
@@ -133,25 +167,21 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
     );
   }, [filteredAndSortedTransactions, currentPage, itemsPerPage]);
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxPagesToShow = 5;
     
     if (totalPages <= maxPagesToShow) {
-      // Show all pages if total is less than max
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
       pages.push(1);
       
       if (currentPage > 3) {
         pages.push('...');
       }
       
-      // Show pages around current page
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
       
@@ -163,7 +193,6 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
         pages.push('...');
       }
       
-      // Always show last page
       pages.push(totalPages);
     }
     
@@ -201,22 +230,28 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
         <BarLoader className="mt-4" width={"100%"} color="#9333ea" />
       )}
 
-      <TableFilters
+      <AllTransactionFilters
         searchTerm={searchTerm}
-        setSearchTerm={(value) => {
+        setSearchTerm={(value: string) => {
           setSearchTerm(value);
           setCurrentPage(1);
         }}
         typeFilter={typeFilter}
-        setTypeFilter={(value) => {
+        setTypeFilter={(value: string) => {
           setTypeFilter(value);
           setCurrentPage(1);
         }}
         recurringFilter={recurringFilter}
-        setRecurringFilter={(value) => {
+        setRecurringFilter={(value: string) => {
           setRecurringFilter(value);
           setCurrentPage(1);
         }}
+        accountFilter={accountFilter}
+        setAccountFilter={(value: string) => {
+          setAccountFilter(value);
+          setCurrentPage(1);
+        }}
+        accounts={accounts}
         selectedCount={selectedIds.length}
         onBulkDelete={handleBulkDelete}
         onClearFilters={handleClearFilters}
@@ -224,7 +259,7 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
 
       <div className="rounded-md border">
         <Table>
-          <TransactionTableHeader
+          <AllTransactionTableHeader
             sortConfig={sortConfig}
             onSort={handleSort}
             allSelected={
@@ -237,13 +272,13 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
           <TableBody>
             {paginatedTransactions.length === 0 ? (
               <TableRow>
-                <TableCell className="h-24 text-center text-muted-foreground" colSpan={7}>
+                <TableCell className="h-24 text-center text-muted-foreground" colSpan={8}>
                   No transactions found.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedTransactions.map((transaction) => (
-                <TransactionRow
+                <AllTransactionRow
                   key={transaction.id}
                   transaction={transaction}
                   isSelected={selectedIds.includes(transaction.id)}
@@ -256,10 +291,8 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
         </Table>
       </div>
 
-      {/* Pagination */}
       {filteredAndSortedTransactions.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Rows per page selector */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Rows per page:</span>
             <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
@@ -279,7 +312,6 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
             </span>
           </div>
 
-          {/* Page navigation */}
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
               <Button
@@ -327,4 +359,4 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
   );
 };
 
-export default TransactionTable;
+export default AllTransactionsTable;

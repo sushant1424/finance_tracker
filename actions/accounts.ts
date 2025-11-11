@@ -190,6 +190,42 @@ export async function getAccountWithTransactions(accountId: string) {
   };
 }
 
+export async function getAllUserTransactions() {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    const transactions = await db.transaction.findMany({
+      where: { userId: user.id },
+      include: {
+        account: {
+          select: {
+            name: true,
+            type: true,
+          },
+        },
+      },
+      orderBy: { date: "desc" },
+    });
+
+    const serializedTransactions = transactions.map((transaction) => ({
+      ...serializeTransaction(transaction),
+      account: transaction.account,
+    }));
+
+    return serializedTransactions;
+  } catch (error: any) {
+    console.error(error.message);
+    return [];
+  }
+}
+
 export async function bulkDeleteTransactions(transactionIds: string[]) {
   try {
     const { userId } = await auth();
@@ -247,6 +283,7 @@ export async function bulkDeleteTransactions(transactionIds: string[]) {
     revalidatePath("/dashboard");
     revalidatePath("/account/[id]");
     revalidatePath("/accountInfo");
+    revalidatePath("/transaction");
 
     return { success: true };
   } catch (error: any) {

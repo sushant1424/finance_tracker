@@ -12,16 +12,40 @@ import { Clock, MoreHorizontal, RefreshCw, Edit, Trash } from 'lucide-react';
 import { formatIndianNumber } from '@/lib/currency';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { Transaction, RECURRING_INTERVALS } from './types';
 
-interface TransactionRowProps {
+const RECURRING_INTERVALS = {
+  DAILY: "Daily",
+  WEEKLY: "Weekly",
+  MONTHLY: "Monthly",
+  YEARLY: "Yearly",
+} as const;
+
+interface Account {
+  name: string;
+  type: string;
+}
+
+interface Transaction {
+  id: string;
+  date: string;
+  description: string;
+  type: "INCOME" | "EXPENSE";
+  category: string;
+  amount: number;
+  isRecurring?: boolean;
+  recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+  nextRecurringDate?: string;
+  account: Account;
+}
+
+interface AllTransactionRowProps {
   transaction: Transaction;
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDelete: (ids: string[]) => void;
 }
 
-export const TransactionRow: React.FC<TransactionRowProps> = ({
+export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
   transaction,
   isSelected,
   onSelect,
@@ -43,6 +67,15 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
       </TableCell>
       
       <TableCell>{transaction.description}</TableCell>
+      
+      <TableCell>
+        <div className="flex flex-col">
+          <span className="font-medium">{transaction.account.name}</span>
+          <span className="text-xs text-muted-foreground capitalize">
+            {transaction.account.type.toLowerCase()}
+          </span>
+        </div>
+      </TableCell>
       
       <TableCell className="capitalize">
         <span 
