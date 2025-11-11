@@ -70,7 +70,7 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = ({
       </CardHeader>
       <CardContent className="pt-4">
         <div className="space-y-2">
-          {transactions.map((transaction, index) => (
+          {transactions.slice(0, 4).map((transaction) => (
             <div
               key={transaction.id}
               className="flex items-center justify-between p-2 sm:p-3 rounded-xl border border-transparent hover:border-purple-100 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent hover:shadow-sm transition-all duration-200 group"

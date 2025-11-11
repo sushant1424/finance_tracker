@@ -47,7 +47,7 @@ export const TopCategories: React.FC<TopCategoriesProps> = ({
           Top Spending Categories
         </CardTitle>
         <p className="text-xs text-muted-foreground mt-1">
-          This month's breakdown
+          This month&apos;s breakdown
         </p>
       </CardHeader>
       <CardContent>
@@ -75,7 +75,7 @@ export const TopCategories: React.FC<TopCategoriesProps> = ({
                   value={percentage} 
                   className="h-1.5"
                   style={{
-                    // @ts-ignore
+                    // @ts-expect-error - Custom CSS variable
                     '--progress-background': categoryColors[cat.category]
                   }}
                 />

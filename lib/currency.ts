@@ -16,7 +16,7 @@ export function formatIndianCurrency(amount: number): string {
   
   // Indian numbering system: First group of 3, then groups of 2
   let lastThree = integerPart.slice(-3);
-  let otherNumbers = integerPart.slice(0, -3);
+  const otherNumbers = integerPart.slice(0, -3);
   
   if (otherNumbers !== '') {
     lastThree = ',' + lastThree;
@@ -38,7 +38,7 @@ export function formatIndianNumber(amount: number): string {
   const [integerPart, decimalPart] = absoluteAmount.toFixed(2).split('.');
   
   let lastThree = integerPart.slice(-3);
-  let otherNumbers = integerPart.slice(0, -3);
+  const otherNumbers = integerPart.slice(0, -3);
   
   if (otherNumbers !== '') {
     lastThree = ',' + lastThree;

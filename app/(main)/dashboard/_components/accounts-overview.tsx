@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, Plus, TrendingUp } from 'lucide-react';
+import { Wallet, Plus } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { formatIndianNumber } from '@/lib/currency';

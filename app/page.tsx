@@ -1,9 +1,5 @@
 
 import Header from "@/components/header";
-
-import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
-import { FlipWords } from "@/components/ui/flip-words";
-import Link from "next/link";
 import WobbleFinanceSection from "@/components/landing/WobbleFinanceSection";
 import { HeroSectionDemo } from "@/components/landing/HeroSection";
 
