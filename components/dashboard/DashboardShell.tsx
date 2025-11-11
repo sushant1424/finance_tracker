@@ -24,6 +24,7 @@ const SidebarContent = () => {
   ], []);
 
   const { user } = useUser();
+  const { open, animate } = useSidebar();
   const firstName = user?.firstName || user?.username ;
   const lastName = user?.lastName || "";
 
@@ -44,7 +45,15 @@ const SidebarContent = () => {
               elements: { avatarBox: "w-7 h-7" },
             }}
           />
-          <span className="text-sm text-neutral-700">{`${firstName} ${lastName}`}</span>
+          <motion.span
+            animate={{
+              display: animate ? (open ? "inline-block" : "none") : "inline-block",
+              opacity: animate ? (open ? 1 : 0) : 1,
+            }}
+            className="text-sm text-neutral-700 whitespace-pre"
+          >
+            {`${firstName} ${lastName}`}
+          </motion.span>
         </div>
       </div>
     </div>

@@ -6,8 +6,18 @@ import { subDays } from "date-fns";
 const ACCOUNT_ID = "3dc48df4-563f-4de4-bd83-e9e70384e7ea";
 const USER_ID = "ea08d87c-29f0-4393-9fcf-93de3c54f629";
 
+interface CategoryRange {
+  name: string;
+  range: [number, number];
+}
+
+interface Categories {
+  INCOME: CategoryRange[];
+  EXPENSE: CategoryRange[];
+}
+
 // Categories with their typical amount ranges
-const CATEGORIES = {
+const CATEGORIES: Categories = {
   INCOME: [
     { name: "salary", range: [5000, 8000] },
     { name: "freelance", range: [1000, 3000] },
@@ -29,12 +39,12 @@ const CATEGORIES = {
 };
 
 // Helper to generate random amount within a range
-function getRandomAmount(min, max) {
+function getRandomAmount(min: number, max: number): number {
   return Number((Math.random() * (max - min) + min).toFixed(2));
 }
 
 // Helper to get random category with amount
-function getRandomCategory(type) {
+function getRandomCategory(type: "INCOME" | "EXPENSE"): { category: string; amount: number } {
   const categories = CATEGORIES[type];
   const category = categories[Math.floor(Math.random() * categories.length)];
   const amount = getRandomAmount(category.range[0], category.range[1]);
@@ -44,7 +54,7 @@ function getRandomCategory(type) {
 export async function seedTransactions() {
   try {
     // Generate 90 days of transactions
-    const transactions = [];
+    const transactions: any[] = [];
     let totalBalance = 0;
 
     for (let i = 90; i >= 0; i--) {
@@ -55,7 +65,7 @@ export async function seedTransactions() {
 
       for (let j = 0; j < transactionsPerDay; j++) {
         // 40% chance of income, 60% chance of expense
-        const type = Math.random() < 0.4 ? "INCOME" : "EXPENSE";
+        const type: "INCOME" | "EXPENSE" = Math.random() < 0.4 ? "INCOME" : "EXPENSE";
         const { category, amount } = getRandomCategory(type);
 
         const transaction = {
@@ -102,7 +112,7 @@ export async function seedTransactions() {
       success: true,
       message: `Created ${transactions.length} transactions`,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error seeding transactions:", error);
     return { success: false, error: error.message };
   }

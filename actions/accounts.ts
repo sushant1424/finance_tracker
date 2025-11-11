@@ -3,8 +3,9 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { AccountType } from "@/lib/generated/prisma";
 
-const serializeTransaction = (obj) => {
+const serializeTransaction = (obj: any): any => {
   const serialized = { ...obj };
   if (obj.balance) {
     serialized.balance = obj.balance.toNumber();
@@ -16,6 +17,12 @@ const serializeTransaction = (obj) => {
   return serialized;
 };
 
+interface AccountData {
+  name: string;
+  type: AccountType;
+  balance: string | number;
+  isDefault?: boolean;
+}
 
 export async function getUserAccounts() {
   const { userId } = await auth();
@@ -46,14 +53,14 @@ export async function getUserAccounts() {
     const serializedAccounts = accounts.map(serializeTransaction);
 
     return serializedAccounts;
-  } catch (error) {
+  } catch (error: any) {
     console.error(error.message);
     return [];
   }
 }
 
 
-export async function createAccount(data){
+export async function createAccount(data: AccountData){
 
     try{
 
@@ -69,7 +76,7 @@ export async function createAccount(data){
 
 
     // Convert balance to float before saving
-    const balanceFloat = parseFloat(data.balance);
+    const balanceFloat = parseFloat(data.balance.toString());
     if (isNaN(balanceFloat)){ 
         throw new Error("Invalid Balance");
     }
@@ -107,18 +114,13 @@ export async function createAccount(data){
 
     revalidatePath("/account");
     return { success: true, data: serializedAccount };
-  } catch (error){
+  } catch (error: any){
     throw new Error(error.message);
   }  
-
-
-
-
-
 }
 
 
-export async function updateDefaultAccount(accountId) {
+export async function updateDefaultAccount(accountId: string) {
     
     try{
         const { userId } = await auth();
@@ -150,12 +152,12 @@ export async function updateDefaultAccount(accountId) {
         revalidatePath("/account");
         return {success:true, data: serializeTransaction(account)};
     }
-    catch(error){
+    catch(error: any){
         return {success:false, error: error.message};
     }
 }
 
-export async function getAccountWithTransactions(accountId) {
+export async function getAccountWithTransactions(accountId: string) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -186,4 +188,68 @@ export async function getAccountWithTransactions(accountId) {
     ...serializeTransaction(account),
     transactions: account.transactions.map(serializeTransaction),
   };
+}
+
+export async function bulkDeleteTransactions(transactionIds: string[]) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    // Get transactions to calculate balance changes
+    const transactions = await db.transaction.findMany({
+      where: {
+        id: { in: transactionIds },
+        userId: user.id,
+      },
+    });
+
+    // Group transactions by account to update balances
+    const accountBalanceChanges = transactions.reduce((acc: Record<string, number>, transaction) => {
+      const change =
+        transaction.type === "EXPENSE"
+          ? transaction.amount.toNumber()
+          : -transaction.amount.toNumber();
+      acc[transaction.accountId] = (acc[transaction.accountId] || 0) + change;
+      return acc;
+    }, {});
+
+    // Delete transactions and update account balances in a transaction
+    await db.$transaction(async (tx) => {
+      // Delete transactions
+      await tx.transaction.deleteMany({
+        where: {
+          id: { in: transactionIds },
+          userId: user.id,
+        },
+      });
+
+      // Update account balances
+      for (const [accountId, balanceChange] of Object.entries(
+        accountBalanceChanges
+      )) {
+        await tx.account.update({
+          where: { id: accountId },
+          data: {
+            balance: {
+              increment: balanceChange,
+            },
+          },
+        });
+      }
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/account/[id]");
+    revalidatePath("/accountInfo");
+
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 }
