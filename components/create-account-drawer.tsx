@@ -35,7 +35,12 @@ const CreateAccountDrawer = ({children}: CreateAccountDrawerProps) => {
     const {data:newAccount,loading:createAccountLoading,error,fn:createAccountFn} = useFetch(createAccount)
 
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: {
+        name: string;
+        type: 'SAVINGS' | 'EXPENSE' | 'INCOME';
+        balance: string;
+        isDefault: boolean;
+    }) => {
         await createAccountFn(data);
     }
 

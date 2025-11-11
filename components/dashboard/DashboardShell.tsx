@@ -35,7 +35,7 @@ const SidebarContent = () => {
       </Link>
       <div className="mt-8 flex flex-col gap-2">
         {links.map((link, idx) => (
-          <SidebarLink key={idx} link={link as any} />
+          <SidebarLink key={idx} link={link} />
         ))}
       </div>
       <div className="mt-auto pt-6">

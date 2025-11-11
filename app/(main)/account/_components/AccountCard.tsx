@@ -1,6 +1,6 @@
 "use client"
 import { updateDefaultAccount } from '@/actions/accounts';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle} from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import useFetch from '@/hooks/use-fetch';
 import { ArrowDownRight, ArrowUpRight} from 'lucide-react';
@@ -9,7 +9,13 @@ import React from 'react'
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 type AccountCardProps = {
-  account: any; 
+  account: {
+    id: string;
+    name: string;
+    type: string;
+    balance: number;
+    isDefault: boolean;
+  };
 };
 
 const AccountCard = ({ account }: AccountCardProps) => {
@@ -34,9 +40,7 @@ const AccountCard = ({ account }: AccountCardProps) => {
     }
 
      useEffect(() => {
-        // Since updatedAccount could be undefined or an object, and to avoid type errors,
-        // check if updatedAccount exists and treat as type any for success property access
-        if ((updatedAccount as any)?.success) {
+        if (updatedAccount && typeof updatedAccount === 'object' && 'success' in updatedAccount && updatedAccount.success) {
             toast.success("Default account updated successfully");
         }
      }, [updatedAccount]);
@@ -63,7 +67,7 @@ const AccountCard = ({ account }: AccountCardProps) => {
             <CardContent>
                 
                 <div className="text-2xl font-bold">
-                    {parseFloat(balance).toFixed(2)}
+                    {Number(balance).toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">
                     {type.charAt(0)+ type.slice(1).toLowerCase()} Account
