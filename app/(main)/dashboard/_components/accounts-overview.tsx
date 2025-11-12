@@ -26,9 +26,13 @@ interface AccountsOverviewProps {
 export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
   accounts,
 }) => {
+  const sortedAccounts = [...accounts].sort(
+    (a, b) => b._count.transactions - a._count.transactions
+  );
+
   if (accounts.length === 0) {
     return (
-      <Card className="border border-gray-100 shadow-md bg-gradient-to-br from-white to-blue-50/10">
+      <Card className="h-full border border-gray-200 shadow-sm bg-white">
         <CardHeader className="pb-4 border-b border-gray-100">
           <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
             <div className="p-2 bg-blue-100 rounded-lg shadow-sm ring-1 ring-blue-200">
@@ -58,7 +62,7 @@ export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
   }
 
   return (
-    <Card className="border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-blue-50/10">
+    <Card className="h-full border border-gray-200 shadow-sm bg-white">
       <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-gray-100">
         <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
           <div className="p-2 bg-blue-100 rounded-lg shadow-sm ring-1 ring-blue-200">
@@ -74,9 +78,9 @@ export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
       </CardHeader>
       <CardContent className="pt-4">
         <div className="space-y-2">
-          {accounts.map((account) => (
+          {sortedAccounts.map((account) => (
             <Link key={account.id} href={`/accountInfo/${account.id}`}>
-              <div className="p-3 sm:p-4 rounded-xl border border-transparent hover:border-blue-100 bg-gradient-to-r from-gray-50/30 to-transparent hover:from-blue-50/50 hover:shadow-sm transition-all duration-200 cursor-pointer group">
+              <div className="p-3 sm:p-4 rounded-xl border border-transparent hover:border-blue-100 hover:bg-blue-50/40 transition-all duration-200 cursor-pointer group">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -99,7 +103,7 @@ export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
                   </div>
                   <div className="text-right">
                     <p className="text-xs sm:text-sm font-bold text-gray-900 whitespace-nowrap">
-                      Rs.{formatIndianNumber(account.balance)}
+                      NPR.{formatIndianNumber(account.balance)}
                     </p>
                   </div>
                 </div>

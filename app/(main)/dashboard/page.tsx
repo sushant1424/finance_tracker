@@ -3,6 +3,7 @@ import { getDashboardData } from '@/actions/dashboard';
 import { StatCard } from './_components/stat-card';
 import { RecentTransactions } from './_components/recent-transactions';
 import { AccountsOverview } from './_components/accounts-overview';
+import { TopCategories } from './_components/top-categories';
 import { BarLoader } from 'react-spinners';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { formatIndianCurrency } from '@/lib/currency';
@@ -57,16 +58,27 @@ const DashboardPage = async () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Recent Transactions */}
-        <Suspense fallback={<BarLoader width="100%" color="#9333ea" />}>
-          <RecentTransactions transactions={data.recentTransactions} />
-        </Suspense>
-
-        {/* Accounts Overview */}
-        <Suspense fallback={<BarLoader width="100%" color="#9333ea" />}>
-          <AccountsOverview accounts={data.accounts} />
-        </Suspense>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="w-full">
+          <Suspense fallback={<BarLoader width="100%" color="#9333ea" />}>
+            <RecentTransactions
+              transactions={data.recentTransactions}
+              accounts={data.accounts}
+            />
+          </Suspense>
+        </div>
+        <div className="w-full">
+          <Suspense fallback={<BarLoader width="100%" color="#9333ea" />}>
+            <AccountsOverview accounts={data.accounts} />
+          </Suspense>
+        </div>
+        <div className="w-full">
+          <Suspense fallback={<BarLoader width="100%" color="#9333ea" />}>
+            <TopCategories
+              categories={data.categoryBreakdown}
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

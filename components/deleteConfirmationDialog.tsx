@@ -5,6 +5,7 @@ interface DeleteDialogProps {
   onOpenChange: (open: boolean) => void;
   count: number;
   onConfirm: () => void;
+  loading?: boolean;
 }
 
 export function DeleteConfirmationDialog({
@@ -12,6 +13,7 @@ export function DeleteConfirmationDialog({
   onOpenChange,
   count,
   onConfirm,
+  loading = false,
 }: DeleteDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -26,12 +28,13 @@ export function DeleteConfirmationDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-red-600 hover:bg-red-700 text-white"
+            disabled={loading}
           >
-            Delete
+            {loading ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

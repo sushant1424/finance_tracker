@@ -1,5 +1,5 @@
 /**
- * Formats a number to Indian Rupee format
+ * Formats a number to Nepali Rupee (NPR) format
  * Examples:
  * 1000 -> 1,000
  * 10000 -> 10,000
@@ -25,11 +25,11 @@ export function formatIndianCurrency(amount: number): string {
   // Add commas for groups of 2 digits
   const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
   
-  return `${isNegative ? '-' : ''}Rs.${formatted}.${decimalPart}`;
+  return `${isNegative ? '-' : ''}NPR.${formatted}.${decimalPart}`;
 }
 
 /**
- * Format currency without Rs prefix
+ * Format currency without NPR prefix
  */
 export function formatIndianNumber(amount: number): string {
   const isNegative = amount < 0;

@@ -13,6 +13,7 @@ import { BarLoader } from 'react-spinners';
 import { AllTransactionFilters } from './all-transaction-filters';
 import { AllTransactionTableHeader } from './all-transaction-table-header';
 import { AllTransactionRow } from './all-transaction-row';
+import { DeleteConfirmationDialog } from '@/components/deleteConfirmationDialog';
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
@@ -204,16 +205,17 @@ const AllTransactionsTable: React.FC<AllTransactionsTableProps> = ({
     fn: deleteFn,
     data: deleted,
   } = useFetch(bulkDeleteTransactions);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  const handleBulkDelete = async () => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedIds.length} transactions?`
-      )
-    )
-      return;
+  const openBulkDeleteDialog = () => {
+    if (selectedIds.length === 0) return;
+    setBulkDeleteOpen(true);
+  };
 
+  const confirmBulkDelete = () => {
+    if (selectedIds.length === 0) return;
     deleteFn(selectedIds);
+    setBulkDeleteOpen(false);
   };
 
   useEffect(() => {
@@ -253,8 +255,16 @@ const AllTransactionsTable: React.FC<AllTransactionsTableProps> = ({
         }}
         accounts={accounts}
         selectedCount={selectedIds.length}
-        onBulkDelete={handleBulkDelete}
+        onBulkDelete={openBulkDeleteDialog}
         onClearFilters={handleClearFilters}
+      />
+
+      <DeleteConfirmationDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        count={selectedIds.length}
+        onConfirm={confirmBulkDelete}
+        loading={deleteLoading}
       />
 
       <div className="rounded-md border">

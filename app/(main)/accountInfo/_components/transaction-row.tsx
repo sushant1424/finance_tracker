@@ -11,8 +11,18 @@ import { format } from 'date-fns';
 import { Clock, MoreHorizontal, RefreshCw, Edit, Trash } from 'lucide-react';
 import { formatIndianNumber } from '@/lib/currency';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 import { Transaction, RECURRING_INTERVALS } from './types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface TransactionRowProps {
   transaction: Transaction;
@@ -28,6 +38,12 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   onDelete,
 }) => {
   const router = useRouter();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleDelete = () => {
+    onDelete([transaction.id]);
+    setConfirmOpen(false);
+  };
 
   return (
     <TableRow>
@@ -53,8 +69,12 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
         </span>
       </TableCell>
       
-      <TableCell className="text-right font-semibold">
-        {transaction.type === "EXPENSE" ? "-" : "+"}Rs.{formatIndianNumber(transaction.amount)}
+      <TableCell
+        className={`text-right font-semibold ${
+          transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
+        }`}
+      >
+        {transaction.type === "EXPENSE" ? "-" : "+"}NPR.{formatIndianNumber(transaction.amount)}
       </TableCell>
 
       <TableCell>
@@ -105,13 +125,37 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive" 
-              onClick={() => onDelete([transaction.id])}
+              onSelect={(event) => {
+                event.preventDefault();
+                setConfirmOpen(true);
+              }}
             >
               <Trash className="h-4 w-4 mr-2" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-red-600">
+                Delete Transaction
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will permanently remove <strong>{transaction.description || 'this transaction'}</strong> from the account history. This can&apos;t be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   );

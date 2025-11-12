@@ -3,7 +3,7 @@ import { toast } from "sonner";
 
 type UseFetchReturn<T> = {
   data: T | undefined;
-  loading: boolean | null;
+  loading: boolean; 
   error: Error | null;
   fn: (...args: any[]) => Promise<void>;
   setData: React.Dispatch<React.SetStateAction<T | undefined>>;
@@ -11,7 +11,7 @@ type UseFetchReturn<T> = {
 
 const useFetch = <T = any>(cb: (...args: any[]) => Promise<T>): UseFetchReturn<T> => {
   const [data, setData] = useState<T | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fn = async (...args: any[]) => {

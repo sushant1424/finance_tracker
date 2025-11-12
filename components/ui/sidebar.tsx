@@ -4,6 +4,7 @@ import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface Links {
   label: string;
@@ -89,7 +90,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-4 hidden  md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] shrink-0",
+          "h-full px-4 py-4 hidden md:flex md:flex-col bg-[#050b20] w-[300px] shrink-0 text-white",
           className
         )}
         animate={{
@@ -115,13 +116,13 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
+          "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-[#050b20] w-full text-white"
         )}
         {...props}
       >
         <div className="flex justify-end z-20 w-full">
           <IconMenu2
-            className="text-neutral-800 dark:text-neutral-200"
+            className="text-white"
             onClick={() => setOpen(!open)}
           />
         </div>
@@ -136,12 +137,12 @@ export const MobileSidebar = ({
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+                "fixed h-full w-full inset-0 bg-[#050b20] text-white p-10 z-[100] flex flex-col justify-between",
                 className
               )}
             >
               <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
+                className="absolute right-10 top-10 z-50 text-white"
                 onClick={() => setOpen(!open)}
               >
                 <IconX />
@@ -158,17 +159,27 @@ export const MobileSidebar = ({
 export const SidebarLink = ({
   link,
   className,
+  forceLabel = false,
   ...props
 }: {
   link: Links;
   className?: string;
+  forceLabel?: boolean;
 }) => {
   const { open, animate } = useSidebar();
+  const pathname = usePathname();
+  const isActive =
+    pathname === link.href || pathname.startsWith(`${link.href}/`);
+  const shouldAnimate = !forceLabel && animate;
+
   return (
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-2  group/sidebar py-2",
+        "flex items-center justify-start gap-2 group/sidebar py-2 rounded-xl transition-colors",
+        isActive
+          ? "bg-white/20 text-white shadow-inner"
+          : "text-white/85 hover:text-white hover:bg-white/10",
         className
       )}
       {...props}
@@ -177,10 +188,14 @@ export const SidebarLink = ({
 
       <motion.span
         animate={{
-          display: animate ? (open ? "inline-block" : "none") : "inline-block",
-          opacity: animate ? (open ? 1 : 0) : 1,
+          display: shouldAnimate
+            ? open
+              ? "inline-block"
+              : "none"
+            : "inline-block",
+          opacity: shouldAnimate ? (open ? 1 : 0) : 1,
         }}
-        className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className="text-sm text-white group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
       >
         {link.label}
       </motion.span>

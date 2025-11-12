@@ -14,6 +14,7 @@ import { Transaction, SortConfig } from './types';
 import { TableFilters } from './table-filters';
 import { TransactionTableHeader } from './table-header';
 import { TransactionRow } from './transaction-row';
+import { DeleteConfirmationDialog } from '@/components/deleteConfirmationDialog';
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
@@ -29,6 +30,7 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
   const [recurringFilter, setRecurringFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0]);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   const handleSort = (field: string) => {
     setSortConfig((current) => ({
@@ -176,15 +178,15 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
     data: deleted,
   } = useFetch(bulkDeleteTransactions);
 
-  const handleBulkDelete = async () => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedIds.length} transactions?`
-      )
-    )
-      return;
+  const openBulkDeleteDialog = () => {
+    if (selectedIds.length === 0) return;
+    setBulkDeleteOpen(true);
+  };
 
+  const confirmBulkDelete = () => {
+    if (selectedIds.length === 0) return;
     deleteFn(selectedIds);
+    setBulkDeleteOpen(false);
   };
 
   useEffect(() => {
@@ -218,8 +220,16 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
           setCurrentPage(1);
         }}
         selectedCount={selectedIds.length}
-        onBulkDelete={handleBulkDelete}
+        onBulkDelete={openBulkDeleteDialog}
         onClearFilters={handleClearFilters}
+      />
+
+      <DeleteConfirmationDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        count={selectedIds.length}
+        onConfirm={confirmBulkDelete}
+        loading={deleteLoading ?? false}
       />
 
       <div className="rounded-md border">

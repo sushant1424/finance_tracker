@@ -81,19 +81,36 @@ export async function getDashboardData() {
       .filter((t) => t.type === "EXPENSE")
       .reduce((sum, t) => sum + t.amount.toNumber(), 0);
 
-    // Get category-wise spending for current month
-    const categorySpending = monthTransactions
-      .filter((t) => t.type === "EXPENSE")
-      .reduce((acc: Record<string, number>, transaction) => {
-        const category = transaction.category;
-        acc[category] = (acc[category] || 0) + transaction.amount.toNumber();
-        return acc;
-      }, {});
+    // Get category-wise statistics based on transaction counts and total amount
+    const categoryStats = monthTransactions.reduce<
+      Record<string, { category: string; amount: number; count: number }>
+    >((acc, transaction) => {
+      const category = transaction.category || "uncategorized";
+      if (!acc[category]) {
+        acc[category] = {
+          category,
+          amount: 0,
+          count: 0,
+        };
+      }
+      acc[category].amount += transaction.amount.toNumber();
+      acc[category].count += 1;
+      return acc;
+    }, {});
 
-    const topCategories = Object.entries(categorySpending)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([category, amount]) => ({ category, amount }));
+    const categoryBreakdown = Object.values(categoryStats)
+      .sort((a, b) => {
+        if (b.count === a.count) {
+          return b.amount - a.amount;
+        }
+        return b.count - a.count;
+      })
+      .slice(0, 5);
+
+    const categoryBreakdownTotal = categoryBreakdown.reduce(
+      (sum, category) => sum + category.amount,
+      0
+    );
 
     return {
       totalBalance,
@@ -106,7 +123,8 @@ export async function getDashboardData() {
         ...serializeTransaction(t),
         account: t.account,
       })),
-      topCategories,
+      categoryBreakdown,
+      categoryBreakdownTotal,
     };
   } catch (error: any) {
     console.error(error.message);
