@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import TransactionTable from "../_components/transaction-table";
 import { Breadcrumb } from '@/components/breadcrumb';
 import { formatIndianNumber } from '@/lib/currency';
+import TransactionBarChart from "../_components/transaction-bar-chart";
 
 interface AccountPageProps {
   params: {
@@ -49,7 +50,9 @@ export default async function AccountPage({ params }: AccountPageProps) {
       </div>
 
       {/* Chart Section */}
-      
+      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea"/>}>
+        <TransactionBarChart transactions={transactions} />
+      </Suspense>
 
       {/* Transactions Table */}
       <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea"/>}>

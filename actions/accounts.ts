@@ -184,10 +184,11 @@ export async function getAccountWithTransactions(accountId: string) {
 
   if (!account) return null;
 
-  return {
-    ...serializeTransaction(account),
-    transactions: account.transactions.map(serializeTransaction),
-  };
+  const serializedAccount = serializeTransaction(account);
+  // Ensure transactions are correctly serialized and replace the potentially unserialized ones
+  serializedAccount.transactions = account.transactions.map(serializeTransaction);
+
+  return serializedAccount;
 }
 
 export async function getAllUserTransactions() {
