@@ -25,7 +25,7 @@ export function formatIndianCurrency(amount: number): string {
   // Add commas for groups of 2 digits
   const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
   
-  return `${isNegative ? '-' : ''}NPR.${formatted}.${decimalPart}`;
+  return `${isNegative ? '-' : ''}NPR ${formatted}.${decimalPart}`;
 }
 
 /**

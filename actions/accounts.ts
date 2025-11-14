@@ -291,3 +291,176 @@ export async function bulkDeleteTransactions(transactionIds: string[]) {
     return { success: false, error: error.message };
   }
 }
+
+interface TransactionData {
+  type: "INCOME" | "EXPENSE";
+  amount: string | number;
+  description?: string;
+  date: string;
+  category: string;
+  accountId: string;
+  isRecurring?: boolean;
+  recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+  status?: "PENDING" | "COMPLETED" | "FAILED";
+}
+
+export async function createTransaction(data: TransactionData) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    // Verify account belongs to user
+    const account = await db.account.findFirst({
+      where: {
+        id: data.accountId,
+        userId: user.id,
+      },
+    });
+
+    if (!account) throw new Error("Account not found");
+
+    // Convert amount to decimal
+    const amountFloat = parseFloat(data.amount.toString());
+    if (isNaN(amountFloat) || amountFloat <= 0) {
+      throw new Error("Invalid amount");
+    }
+
+    // Parse date
+    const transactionDate = new Date(data.date);
+
+    // Calculate next recurring date if applicable
+    let nextRecurringDate: Date | null = null;
+    if (data.isRecurring && data.recurringInterval) {
+      nextRecurringDate = new Date(transactionDate);
+      switch (data.recurringInterval) {
+        case "DAILY":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 1);
+          break;
+        case "WEEKLY":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 7);
+          break;
+        case "MONTHLY":
+          nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 1);
+          break;
+        case "YEARLY":
+          nextRecurringDate.setFullYear(nextRecurringDate.getFullYear() + 1);
+          break;
+      }
+    }
+
+    // Create transaction and update account balance in a transaction
+    const result = await db.$transaction(async (tx) => {
+      // Create transaction
+      const transaction = await tx.transaction.create({
+        data: {
+          type: data.type,
+          amount: amountFloat,
+          description: data.description || null,
+          date: transactionDate,
+          category: data.category,
+          accountId: data.accountId,
+          userId: user.id,
+          isRecurring: data.isRecurring || false,
+          recurringInterval: data.recurringInterval || null,
+          nextRecurringDate: nextRecurringDate,
+          status: data.status || "COMPLETED",
+        },
+      });
+
+      // Update account balance
+      const balanceChange = data.type === "INCOME" ? amountFloat : -amountFloat;
+      await tx.account.update({
+        where: { id: data.accountId },
+        data: {
+          balance: {
+            increment: balanceChange,
+          },
+        },
+      });
+
+      return transaction;
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/account/[id]");
+    revalidatePath("/accountInfo");
+    revalidatePath("/transaction");
+
+    return { success: true, data: serializeTransaction(result) };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteAccount(accountId: string) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    // Verify account belongs to user
+    const account = await db.account.findFirst({
+      where: {
+        id: accountId,
+        userId: user.id,
+      },
+    });
+
+    if (!account) throw new Error("Account not found");
+
+    // Check if this is the only account
+    const allAccounts = await db.account.findMany({
+      where: { userId: user.id },
+    });
+
+    if (allAccounts.length === 1) {
+      throw new Error("Cannot delete the only account. Please create another account first.");
+    }
+
+    // Check if this is the default account
+    if (account.isDefault) {
+      // Find another account to set as default
+      const otherAccount = allAccounts.find((acc) => acc.id !== accountId);
+      if (otherAccount) {
+        await db.account.update({
+          where: { id: otherAccount.id },
+          data: { isDefault: true },
+        });
+      }
+    }
+
+    // Delete account and all associated transactions in a transaction
+    await db.$transaction(async (tx) => {
+      // Delete all transactions associated with this account
+      await tx.transaction.deleteMany({
+        where: { accountId: accountId },
+      });
+
+      // Delete the account
+      await tx.account.delete({
+        where: { id: accountId },
+      });
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/account");
+    revalidatePath("/account/[id]");
+    revalidatePath("/accountInfo");
+    revalidatePath("/transaction");
+
+    return { success: true };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}

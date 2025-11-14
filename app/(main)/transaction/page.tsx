@@ -3,9 +3,9 @@ import { getAllUserTransactions, getUserAccounts } from '@/actions/accounts';
 import { BarLoader } from 'react-spinners';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import Link from 'next/link';
 import AllTransactionsTable from './_components/all-transactions-table';
 import { Breadcrumb } from '@/components/breadcrumb';
+import CreateTransactionDrawer from '@/components/create-transaction-drawer';
 
 export default async function TransactionsPage() {
   const [transactions, accounts] = await Promise.all([
@@ -27,12 +27,12 @@ export default async function TransactionsPage() {
           </p>
         </div>
         
-        <Link href="/transaction/create">
+        <CreateTransactionDrawer>
           <Button className="gap-2" size="sm">
             <Plus className="h-4 w-4" />
             Add Transaction
           </Button>
-        </Link>
+        </CreateTransactionDrawer>
       </div>
       
       {/* Transactions Table */}

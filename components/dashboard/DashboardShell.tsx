@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import { Sidebar, SidebarLink, useSidebar } from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, PlusCircle, Menu, X, LogOut } from "lucide-react";
+import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, Menu, X, LogOut } from "lucide-react";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,6 @@ import {
 const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
   const links = useMemo(() => [
     { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 shrink-0" /> },
-    { label: "Create Transaction", href: "/transaction/create", icon: <PlusCircle className="h-5 w-5 shrink-0" /> },
     { label: "Transactions", href: "/transaction", icon: <ReceiptText className="h-5 w-5 shrink-0" /> },
     { label: "Accounts", href: "/account", icon: <Wallet className="h-5 w-5 shrink-0" /> },
     { label: "Reports", href: "/reports", icon: <BarChart3 className="h-5 w-5 shrink-0" /> },

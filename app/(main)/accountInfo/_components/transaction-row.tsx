@@ -3,14 +3,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { categoryColors } from '@/data/categories';
 import { format } from 'date-fns';
-import { Clock, MoreHorizontal, RefreshCw, Edit, Trash } from 'lucide-react';
+import { Clock, MoreHorizontal, RefreshCw, Trash } from 'lucide-react';
 import { formatIndianNumber } from '@/lib/currency';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { Transaction, RECURRING_INTERVALS } from './types';
 import {
@@ -37,7 +36,6 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   onSelect,
   onDelete,
 }) => {
-  const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleDelete = () => {
@@ -74,7 +72,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
           transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
         }`}
       >
-        {transaction.type === "EXPENSE" ? "-" : "+"}NPR.{formatIndianNumber(transaction.amount)}
+        {transaction.type === "EXPENSE" ? "-" : "+"}NPR {formatIndianNumber(transaction.amount)}
       </TableCell>
 
       <TableCell>
@@ -116,13 +114,6 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => router.push(`/transaction/create?id=${transaction.id}`)}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive" 
               onSelect={(event) => {

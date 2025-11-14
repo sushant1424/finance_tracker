@@ -88,7 +88,7 @@ export const TopCategories: React.FC<TopCategoriesProps> = ({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `NPR. ${formatIndianNumber(value as number)}`}
+                formatter={(value: number) => `NPR ${formatIndianNumber(value as number)}`}
                 contentStyle={{
                   backgroundColor: 'hsl(var(--popover))',
                   border: '1px solid hsl(var(--border))',
@@ -121,7 +121,7 @@ export const TopCategories: React.FC<TopCategoriesProps> = ({
                 </div>
               </div>
               <p className="text-xs font-bold text-gray-900">
-                NPR.{formatIndianNumber(cat.value)}
+                NPR {formatIndianNumber(cat.value)}
               </p>
             </div>
           ))}

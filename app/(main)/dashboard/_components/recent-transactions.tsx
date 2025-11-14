@@ -161,8 +161,7 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = ({
                         : 'text-red-600'
                     }`}
                   >
-                    {transaction.type === 'INCOME' ? '+' : '-'}NPR.
-                    {formatIndianNumber(transaction.amount)}
+                    {transaction.type === 'INCOME' ? '+' : '-'}NPR {formatIndianNumber(transaction.amount)}
                   </p>
                   <p className="text-[9px] sm:text-[10px] text-gray-400 mt-1 font-medium whitespace-nowrap">
                     {format(new Date(transaction.date), 'MMM dd')}

@@ -103,7 +103,7 @@ export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
                   </div>
                   <div className="text-right">
                     <p className="text-xs sm:text-sm font-bold text-gray-900 whitespace-nowrap">
-                      NPR.{formatIndianNumber(account.balance)}
+                      NPR {formatIndianNumber(account.balance)}
                     </p>
                   </div>
                 </div>

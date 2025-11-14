@@ -112,13 +112,13 @@ const TransactionBarChart = ({ transactions }: { transactions: Transaction[] }) 
             <div className="text-center">
               <p className="text-muted-foreground">Total Income</p>
               <p className="text-lg font-bold text-green-500">
-                NPR. {formatIndianNumber(totals.income)}
+                NPR {formatIndianNumber(totals.income)}
               </p>
             </div>
             <div className="text-center">
               <p className="text-muted-foreground">Total Expenses</p>
               <p className="text-lg font-bold text-red-500">
-                NPR. {formatIndianNumber(totals.expense)}
+                NPR {formatIndianNumber(totals.expense)}
               </p>
             </div>
             <div className="text-center">
@@ -130,7 +130,7 @@ const TransactionBarChart = ({ transactions }: { transactions: Transaction[] }) 
                     : "text-red-500"
                 }`}
               >
-                NPR. {formatIndianNumber(totals.income - totals.expense)}
+                NPR {formatIndianNumber(totals.income - totals.expense)}
               </p>
             </div>
       </div>
@@ -154,7 +154,7 @@ const TransactionBarChart = ({ transactions }: { transactions: Transaction[] }) 
                 tickFormatter={(value) => `Rs ${value}`}
               />
               <Tooltip
-                formatter={(value) => [`NPR. ${value}`, undefined]}
+                formatter={(value) => [`NPR ${value}`, undefined]}
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",

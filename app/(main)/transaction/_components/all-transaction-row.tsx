@@ -3,14 +3,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { categoryColors } from '@/data/categories';
+import { categoryColors, defaultCategories } from '@/data/categories';
 import { format } from 'date-fns';
-import { Clock, MoreHorizontal, RefreshCw, Edit, Trash } from 'lucide-react';
+import { Clock, MoreHorizontal, RefreshCw, Trash } from 'lucide-react';
 import { formatIndianNumber } from '@/lib/currency';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import {
   AlertDialog,
@@ -61,7 +60,6 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
   onSelect,
   onDelete,
 }) => {
-  const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleDelete = () => {
@@ -95,10 +93,10 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
       
       <TableCell className="capitalize">
         <span 
-          style={{ background: categoryColors[transaction.category] }}
+          style={{ background: categoryColors[transaction.category] || '#94a3b8' }}
           className="rounded px-2 py-1 text-white text-sm"
         >
-          {transaction.category}
+          {defaultCategories.find((c) => c.id === transaction.category)?.name || transaction.category}
         </span>
       </TableCell>
       
@@ -107,7 +105,7 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
           transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
         }`}
       >
-        {transaction.type === "EXPENSE" ? "-" : "+"}NPR.{formatIndianNumber(transaction.amount)}
+        {transaction.type === "EXPENSE" ? "-" : "+"}NPR {formatIndianNumber(transaction.amount)}
       </TableCell>
 
       <TableCell>
@@ -149,13 +147,6 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => router.push(`/transaction/create?id=${transaction.id}`)}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive" 
               onSelect={(event) => {

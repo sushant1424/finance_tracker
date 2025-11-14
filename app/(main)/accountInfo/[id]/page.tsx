@@ -41,7 +41,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
 
         <div className="text-right pb-2">
           <div className="text-lg sm:text-xl font-bold">
-            NPR.{formatIndianNumber(parseFloat(account.balance))}
+            NPR {formatIndianNumber(parseFloat(account.balance))}
           </div>
           <p className="text-xs text-muted-foreground">
             {account._count.transactions} Transactions
