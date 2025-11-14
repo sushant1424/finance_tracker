@@ -73,7 +73,7 @@ export default async function RecurringPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                Rs. {monthlyIncome.toLocaleString()}
+                NPR {monthlyIncome.toLocaleString()}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 {recurringData.filter((r: Transaction) => r.type === "INCOME").length} recurring sources
@@ -88,7 +88,7 @@ export default async function RecurringPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                Rs. {monthlyExpenses.toLocaleString()}
+                NPR {monthlyExpenses.toLocaleString()}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 {recurringData.filter((r: Transaction) => r.type === "EXPENSE").length} recurring expenses
@@ -105,7 +105,7 @@ export default async function RecurringPage() {
               <div className={`text-2xl font-bold ${
                 netMonthly >= 0 ? "text-green-600" : "text-red-600"
               }`}>
-                Rs. {netMonthly.toLocaleString()}
+                NPR {netMonthly.toLocaleString()}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 After recurring transactions
