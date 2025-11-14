@@ -134,17 +134,17 @@ const CreateTransactionDrawer = ({ children }: CreateTransactionDrawerProps) => 
     <div>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="pb-3">
+        <DrawerContent className="max-h-[90vh]">
+          <DrawerHeader className="pb-4">
             <DrawerTitle>Create Transaction</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 pb-4 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 100px)' }}>
-            <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
+          <div className="px-4 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Left Column */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {/* Transaction Type */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="type">Transaction Type *</Label>
                     <Select
                       onValueChange={(value: "INCOME" | "EXPENSE") => setValue("type", value)}
