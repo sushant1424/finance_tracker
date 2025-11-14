@@ -2,6 +2,8 @@
 import Header from "@/components/header";
 import WobbleFinanceSection from "@/components/landing/WobbleFinanceSection";
 import { HeroSectionDemo } from "@/components/landing/HeroSection";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import PricingCards from "@/components/landing/PricingCards";
 
 
 export default function Home() {
@@ -19,8 +21,19 @@ export default function Home() {
       
 
       {/*Wobble Finance Section*/}
-      <section className="py-16">
+      <section className = "bg-gray-50">
         <WobbleFinanceSection />
+      </section>
+
+
+       {/* Features Section */}
+       <section >
+          <FeaturesSection />
+      </section>
+
+      {/* Features Section */}
+       <section >
+          <PricingCards />
       </section>
 
 
