@@ -6,9 +6,6 @@ import {
   TrendingUp, 
   Target, 
   Bell, 
-  Shield, 
-  Smartphone,
-  Calendar,
   BarChart3,
   Repeat
 } from "lucide-react";

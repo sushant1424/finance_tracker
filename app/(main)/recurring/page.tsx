@@ -5,7 +5,21 @@ import { Plus, Calendar, Repeat, DollarSign, TrendingUp, TrendingDown } from "lu
 import { getAllUserTransactions } from "@/actions/accounts";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
 
-async function getRecurringTransactions(transactions: any[]) {
+// Define proper types
+interface Transaction {
+  id: string;
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  name?: string;
+  description?: string;
+  date: Date | string;
+  category: string;
+  isRecurring: boolean;
+  recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+  nextRecurringDate?: Date | string;
+}
+
+async function getRecurringTransactions(transactions: Transaction[]) {
   // Filter for recurring transactions
   return transactions.filter(t => t.isRecurring);
 }
@@ -15,22 +29,20 @@ export default async function RecurringPage() {
   const allTransactions = await getAllUserTransactions();
   const recurring = await getRecurringTransactions(allTransactions);
 
-  
-
-  const recurringData = recurring 
+  const recurringData = recurring;
 
   const monthlyIncome = recurringData
-    .filter(r => r.type === "INCOME" && r.frequency === "Monthly")
+    .filter(r => r.type === "INCOME" && r.recurringInterval === "MONTHLY")
     .reduce((sum, r) => sum + r.amount, 0);
 
   const monthlyExpenses = recurringData
-    .filter(r => r.type === "EXPENSE" && r.frequency === "Monthly")
+    .filter(r => r.type === "EXPENSE" && r.recurringInterval === "MONTHLY")
     .reduce((sum, r) => sum + r.amount, 0);
 
   const netMonthly = monthlyIncome - monthlyExpenses;
 
   const upcomingRecurring = recurringData
-    .sort((a: any, b: any) => {
+    .sort((a: Transaction, b: Transaction) => {
       const aDate = a.nextRecurringDate ? new Date(a.nextRecurringDate) : new Date(a.date);
       const bDate = b.nextRecurringDate ? new Date(b.nextRecurringDate) : new Date(b.date);
       return aDate.getTime() - bDate.getTime();
@@ -64,7 +76,7 @@ export default async function RecurringPage() {
                 Rs. {monthlyIncome.toLocaleString()}
               </div>
               <p className="text-xs text-gray-600 mt-1">
-                {recurringData.filter((r: any) => r.type === "INCOME").length} recurring sources
+                {recurringData.filter((r: Transaction) => r.type === "INCOME").length} recurring sources
               </p>
             </CardContent>
           </Card>
@@ -79,7 +91,7 @@ export default async function RecurringPage() {
                 Rs. {monthlyExpenses.toLocaleString()}
               </div>
               <p className="text-xs text-gray-600 mt-1">
-                {recurringData.filter((r: any) => r.type === "EXPENSE").length} recurring expenses
+                {recurringData.filter((r: Transaction) => r.type === "EXPENSE").length} recurring expenses
               </p>
             </CardContent>
           </Card>
@@ -112,7 +124,7 @@ export default async function RecurringPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recurringData.length > 0 ? upcomingRecurring.map((item: any, index: number) => {
+              {recurringData.length > 0 ? upcomingRecurring.map((item: Transaction) => {
                 const nextDate = item.nextRecurringDate || item.date;
                 const frequency = item.recurringInterval || 'MONTHLY';
                 return (
@@ -132,7 +144,7 @@ export default async function RecurringPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        {item.name}
+                        {item.name || item.description || 'Unnamed Transaction'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">
@@ -173,7 +185,7 @@ export default async function RecurringPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recurringData.map((item: any, index: number) => {
+              {recurringData.map((item: Transaction) => {
                 const nextDate = item.nextRecurringDate || item.date;
                 const frequency = item.recurringInterval || 'MONTHLY';
                 return (
@@ -195,7 +207,7 @@ export default async function RecurringPage() {
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">
-                        {item.name}
+                        {item.name || item.description || 'Unnamed Transaction'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
