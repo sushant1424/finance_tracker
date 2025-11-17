@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Calendar, Repeat, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { getAllUserTransactions } from "@/actions/accounts";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
+import { formatIndianCurrency, formatIndianNumber } from "@/lib/currency";
 
 // Define proper types
 interface Transaction {
@@ -73,7 +74,7 @@ export default async function RecurringPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                NPR {monthlyIncome.toLocaleString()}
+                {formatIndianCurrency(monthlyIncome)}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 {recurringData.filter((r: Transaction) => r.type === "INCOME").length} recurring sources
@@ -88,7 +89,7 @@ export default async function RecurringPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                NPR {monthlyExpenses.toLocaleString()}
+                {formatIndianCurrency(monthlyExpenses)}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 {recurringData.filter((r: Transaction) => r.type === "EXPENSE").length} recurring expenses
@@ -105,7 +106,7 @@ export default async function RecurringPage() {
               <div className={`text-2xl font-bold ${
                 netMonthly >= 0 ? "text-green-600" : "text-red-600"
               }`}>
-                NPR {netMonthly.toLocaleString()}
+                {formatIndianCurrency(netMonthly)}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 After recurring transactions
@@ -160,7 +161,7 @@ export default async function RecurringPage() {
                     <div className={`text-lg font-bold ${
                       item.type === "INCOME" ? "text-green-600" : "text-red-600"
                     }`}>
-                      {item.type === "INCOME" ? "+" : "-"}Rs. {item.amount.toLocaleString()}
+                      {item.type === "INCOME" ? "+" : "-"}NPR {formatIndianNumber(item.amount)}
                     </div>
                     <div className="text-sm text-gray-600">
                       {item.category}
@@ -223,7 +224,7 @@ export default async function RecurringPage() {
                     <div className={`text-lg font-semibold ${
                       item.type === "INCOME" ? "text-green-600" : "text-red-600"
                     }`}>
-                      {item.type === "INCOME" ? "+" : "-"}Rs. {item.amount.toLocaleString()}
+                      {item.type === "INCOME" ? "+" : "-"}NPR {formatIndianNumber(item.amount)}
                     </div>
                     <div className="text-xs text-gray-600">
                       Next: {new Date(nextDate).toLocaleDateString()}

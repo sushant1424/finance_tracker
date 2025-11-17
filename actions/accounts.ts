@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { AccountType } from "@/lib/generated/prisma";
 
 const serializeTransaction = (obj: any): any => {
@@ -24,19 +24,16 @@ interface AccountData {
   isDefault?: boolean;
 }
 
-export async function getUserAccounts() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+const getUserAccountsCached = unstable_cache(
+  async (userId: string) => {
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  try {
     const accounts = await db.account.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -49,41 +46,50 @@ export async function getUserAccounts() {
       },
     });
 
-    // Serialize accounts before sending to client
     const serializedAccounts = accounts.map(serializeTransaction);
 
     return serializedAccounts;
+  },
+  ["user-accounts"],
+  {
+    revalidate: 60,
+    tags: ["accounts"],
+  }
+);
+
+export async function getUserAccounts() {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    return await getUserAccountsCached(userId);
   } catch (error: any) {
     console.error(error.message);
     return [];
   }
 }
 
-
 export async function createAccount(data: AccountData){
-
-    try{
-
+  try{
     const { userId } = await auth();
 
     if (!userId) throw new Error("Unauthorized");
 
     const user = await db.user.findUnique({
-        where: { clerkUserId: userId }
+      where: { clerkUserId: userId }
     })
 
     if (!user) throw new Error("User not found");
 
-
     // Convert balance to float before saving
     const balanceFloat = parseFloat(data.balance.toString());
     if (isNaN(balanceFloat)){ 
-        throw new Error("Invalid Balance");
+      throw new Error("Invalid Balance");
     }
 
-     // Check if this is the user's first account
+    // Check if this is the user's first account
     const existingAccounts = await db.account.findMany({
-        where: {userId: user.id}
+      where: {userId: user.id}
     })
 
     // If it's the first account, make it default regardless of user input
@@ -91,7 +97,6 @@ export async function createAccount(data: AccountData){
     const shouldBeDefault =
       existingAccounts.length === 0 ? true : data.isDefault;
 
-    
     if (shouldBeDefault) {
       await db.account.updateMany({
         where: { userId: user.id, isDefault: true },
@@ -109,93 +114,102 @@ export async function createAccount(data: AccountData){
       },
     });
 
-     // Serialize the account before returning
+    // Serialize the account before returning
     const serializedAccount = serializeTransaction(account);
 
     revalidatePath("/account");
+    revalidateTag("dashboard");
+    revalidateTag("accounts");
     return { success: true, data: serializedAccount };
   } catch (error: any){
     throw new Error(error.message);
   }  
 }
 
-
 export async function updateDefaultAccount(accountId: string) {
-    
-    try{
-        const { userId } = await auth();
-        if (!userId) throw new Error("Unauthorized");
+  try{
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
 
-        const user = await db.user.findUnique({
-            where: { clerkUserId: userId },
-        });
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
 
-        if (!user) {
-            throw new Error("User not found");
-        }
-
-        await db.account.updateMany({
-        where: { userId: user.id, isDefault: true },
-        data: { isDefault: false },
-        });
-
-        const account = await db.account.update({
-            where:{
-                id: accountId,
-                userId: user.id
-            },
-            data:{
-                isDefault: true
-            }
-        })
-
-        revalidatePath("/account");
-        return {success:true, data: serializeTransaction(account)};
+    if (!user) {
+      throw new Error("User not found");
     }
-    catch(error: any){
-        return {success:false, error: error.message};
-    }
+
+    await db.account.updateMany({
+      where: { userId: user.id, isDefault: true },
+      data: { isDefault: false },
+    });
+
+    const account = await db.account.update({
+      where:{
+        id: accountId,
+        userId: user.id
+      },
+      data:{
+        isDefault: true
+      }
+    })
+
+    revalidatePath("/account");
+    revalidateTag("dashboard");
+    revalidateTag("accounts");
+    return {success:true, data: serializeTransaction(account)};
+  }
+  catch(error: any){
+    return {success:false, error: error.message};
+  }
 }
+
+const getAccountWithTransactionsCached = unstable_cache(
+  async (userId: string, accountId: string) => {
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    const account = await db.account.findUnique({
+      where: {
+        id: accountId,
+        userId: user.id,
+      },
+      include: {
+        transactions: {
+          orderBy: { date: "desc" },
+        },
+        _count: {
+          select: { transactions: true },
+        },
+      },
+    });
+
+    if (!account) return null;
+
+    const serializedAccount = serializeTransaction(account);
+    serializedAccount.transactions = account.transactions.map(serializeTransaction);
+
+    return serializedAccount;
+  },
+  ["account-with-transactions"],
+  {
+    revalidate: 60,
+    tags: ["account-detail"],
+  }
+);
 
 export async function getAccountWithTransactions(accountId: string) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
-
-  const account = await db.account.findUnique({
-    where: {
-      id: accountId,
-      userId: user.id,
-    },
-    include: {
-      transactions: {
-        orderBy: { date: "desc" },
-      },
-      _count: {
-        select: { transactions: true },
-      },
-    },
-  });
-
-  if (!account) return null;
-
-  const serializedAccount = serializeTransaction(account);
-  // Ensure transactions are correctly serialized and replace the potentially unserialized ones
-  serializedAccount.transactions = account.transactions.map(serializeTransaction);
-
-  return serializedAccount;
+  return getAccountWithTransactionsCached(userId, accountId);
 }
 
-export async function getAllUserTransactions() {
-  try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
+const getAllUserTransactionsCached = unstable_cache(
+  async (userId: string) => {
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
@@ -221,6 +235,20 @@ export async function getAllUserTransactions() {
     }));
 
     return serializedTransactions;
+  },
+  ["all-user-transactions"],
+  {
+    revalidate: 60,
+    tags: ["transactions", "recurring"],
+  }
+);
+
+export async function getAllUserTransactions() {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    return await getAllUserTransactionsCached(userId);
   } catch (error: any) {
     console.error(error.message);
     return [];
@@ -285,6 +313,11 @@ export async function bulkDeleteTransactions(transactionIds: string[]) {
     revalidatePath("/account/[id]");
     revalidatePath("/accountInfo");
     revalidatePath("/transaction");
+    revalidateTag("dashboard");
+    revalidateTag("transactions");
+    revalidateTag("accounts");
+    revalidateTag("account-detail");
+    revalidateTag("recurring");
 
     return { success: true };
   } catch (error: any) {
@@ -391,6 +424,11 @@ export async function createTransaction(data: TransactionData) {
     revalidatePath("/account/[id]");
     revalidatePath("/accountInfo");
     revalidatePath("/transaction");
+    revalidateTag("dashboard");
+    revalidateTag("transactions");
+    revalidateTag("accounts");
+    revalidateTag("account-detail");
+    revalidateTag("recurring");
 
     return { success: true, data: serializeTransaction(result) };
   } catch (error: any) {
@@ -458,6 +496,11 @@ export async function deleteAccount(accountId: string) {
     revalidatePath("/account/[id]");
     revalidatePath("/accountInfo");
     revalidatePath("/transaction");
+    revalidateTag("dashboard");
+    revalidateTag("transactions");
+    revalidateTag("accounts");
+    revalidateTag("account-detail");
+    revalidateTag("recurring");
 
     return { success: true };
   } catch (error: any) {

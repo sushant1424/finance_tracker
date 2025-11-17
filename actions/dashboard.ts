@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { unstable_cache } from "next/cache";
 
 const serializeTransaction = (obj: any): any => {
   const serialized = { ...obj };
@@ -15,11 +16,8 @@ const serializeTransaction = (obj: any): any => {
   return serialized;
 };
 
-export async function getDashboardData() {
-  try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
+const getDashboardDataCached = unstable_cache(
+  async (userId: string) => {
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
@@ -73,16 +71,26 @@ export async function getDashboardData() {
       0
     );
 
-    const monthIncome = monthTransactions
-      .filter((t) => t.type === "INCOME")
-      .reduce((sum, t) => sum + t.amount.toNumber(), 0);
+    const incomeTransactions = monthTransactions.filter(
+      (t) => t.type === "INCOME"
+    );
+    const expenseTransactions = monthTransactions.filter(
+      (t) => t.type === "EXPENSE"
+    );
 
-    const monthExpense = monthTransactions
-      .filter((t) => t.type === "EXPENSE")
-      .reduce((sum, t) => sum + t.amount.toNumber(), 0);
+    const monthIncome = incomeTransactions.reduce(
+      (sum, t) => sum + t.amount.toNumber(),
+      0
+    );
+
+    const monthExpense = expenseTransactions.reduce(
+      (sum, t) => sum + t.amount.toNumber(),
+      0
+    );
 
     // Get category-wise statistics based on transaction counts and total amount
-    const categoryStats = monthTransactions.reduce<
+    // Only EXPENSE transactions should contribute to "Top Spending Categories"
+    const categoryStats = expenseTransactions.reduce<
       Record<string, { category: string; amount: number; count: number }>
     >((acc, transaction) => {
       const category = transaction.category || "uncategorized";
@@ -126,6 +134,20 @@ export async function getDashboardData() {
       categoryBreakdown,
       categoryBreakdownTotal,
     };
+  },
+  ["dashboard-data"],
+  {
+    revalidate: 60,
+    tags: ["dashboard"],
+  }
+);
+
+export async function getDashboardData() {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    return getDashboardDataCached(userId);
   } catch (error: any) {
     console.error(error.message);
     throw error;
