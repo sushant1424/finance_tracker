@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 export const accountSchema = z.object({
     name : z.string().min(5,"Name is required"),
     type : z.enum(['SAVINGS','EXPENSE','INCOME']),
@@ -21,4 +22,24 @@ export const transactionSchema = z.object({
     isRecurring: z.boolean().default(false),
     recurringInterval: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']).optional(),
     status: z.enum(['PENDING', 'COMPLETED', 'FAILED']).default('COMPLETED'),
+});
+
+export const goalSchema = z.object({
+  title: z.string().min(3, "Title is required"),
+  targetAmount: z
+    .string()
+    .min(1, "Target amount is required")
+    .refine(
+      (val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0,
+      "Target amount must be a positive number"
+    ),
+  currentAmount: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      "Current amount must be a non-negative number"
+    ),
+  dueDate: z.string().optional(),
+  description: z.string().optional(),
 });

@@ -25,6 +25,7 @@ model User {
   transactions  Transaction[]
   accounts      Account[]
   budgets       Budget[]
+  goals         Goal[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -86,6 +87,22 @@ model Budget {
   @@map("budgets")
 }
 
+model Goal {
+  id            String      @id @default(uuid())
+  title         String
+  description   String?
+  targetAmount  Decimal
+  currentAmount Decimal      @default(0)
+  dueDate       DateTime?
+  status        GoalStatus  @default(ACTIVE)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([userId])
+  @@map("goals")
+}
 
 enum TransactionType {
   INCOME
@@ -109,4 +126,10 @@ enum RecurringInterval {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
 }
