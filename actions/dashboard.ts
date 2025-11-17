@@ -137,7 +137,7 @@ const getDashboardDataCached = unstable_cache(
   },
   ["dashboard-data"],
   {
-    revalidate: 60,
+    revalidate: 10,
     tags: ["dashboard"],
   }
 );

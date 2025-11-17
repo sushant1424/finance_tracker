@@ -52,7 +52,7 @@ const getUserAccountsCached = unstable_cache(
   },
   ["user-accounts"],
   {
-    revalidate: 60,
+    revalidate: 10,
     tags: ["accounts"],
   }
 );
@@ -196,7 +196,7 @@ const getAccountWithTransactionsCached = unstable_cache(
   },
   ["account-with-transactions"],
   {
-    revalidate: 60,
+    revalidate: 10,
     tags: ["account-detail"],
   }
 );
@@ -238,7 +238,7 @@ const getAllUserTransactionsCached = unstable_cache(
   },
   ["all-user-transactions"],
   {
-    revalidate: 60,
+    revalidate: 10,
     tags: ["transactions", "recurring"],
   }
 );
