@@ -3,10 +3,25 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatIndianCurrency } from "@/lib/currency";
 import { getSpendingByCategory } from "@/actions/statistics";
+import { getAllUserTransactions } from "@/actions/transactions";
 import SpendingByCategoryChart from "./_components/spending-by-category-chart";
+
+interface ExpenseTransaction {
+  id: string;
+  date: string | Date;
+  type: "INCOME" | "EXPENSE";
+  category: string | null;
+  amount: number;
+}
 
 const SpendingPage = async () => {
   const { chartData, total, topCategory } = await getSpendingByCategory();
+  const allTransactions =
+    (await getAllUserTransactions()) as ExpenseTransaction[];
+
+  const expenseTransactions = allTransactions.filter(
+    (tx) => tx.type === "EXPENSE"
+  );
 
   const categoriesCount = chartData.length;
 
@@ -56,7 +71,7 @@ const SpendingPage = async () => {
         </Card>
       </div>
 
-      <SpendingByCategoryChart data={chartData} />
+      <SpendingByCategoryChart transactions={expenseTransactions} />
     </div>
   );
 };

@@ -67,7 +67,7 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
           </div>
         ))}
 
-        <div className="mt-2">
+        <div className="mt-1">
           <button
             type="button"
             onClick={() => setStatisticsOpen((prev) => !prev)}
