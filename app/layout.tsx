@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Finance Tracker",
+  title: "MoneyNest",
   description: "The only app you need to track your finances",
 };
 
