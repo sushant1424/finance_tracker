@@ -57,7 +57,7 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
     <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto sidebar-scroll text-white">
       {!isMobile && (
         <Link href="/dashboard" className="flex items-center gap-2 px-1 text-white">
-          <span className="text-[18px] font-semibold tracking-wide text-white">welth</span>
+          <span className="text-[18px] font-semibold tracking-wide text-white">MoneyNest</span>
         </Link>
       )}
       <div className={`${!isMobile ? 'mt-8' : ''} flex flex-col gap-2`}>
