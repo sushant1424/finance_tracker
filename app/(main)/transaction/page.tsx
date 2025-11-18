@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
-import { getAllUserTransactions, getUserAccounts } from '@/actions/accounts';
+import { getUserAccounts } from '@/actions/accounts';
+import { getAllUserTransactions } from '@/actions/transactions';
 import { BarLoader } from 'react-spinners';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';

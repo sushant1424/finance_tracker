@@ -11,6 +11,23 @@ export const Breadcrumb = () => {
   const generateBreadcrumbs = () => {
     const paths = pathname.split("/").filter(Boolean);
     const breadcrumbs = [{ label: "Home", href: "/dashboard", id: "home" }];
+
+    if (pathname === "/reports") {
+      breadcrumbs.push(
+        {
+          label: "Statistics",
+          href: "/statistics",
+          id: "statistics",
+        },
+        {
+          label: "Reports",
+          href: "/reports",
+          id: "reports",
+        }
+      );
+
+      return breadcrumbs;
+    }
     
     let currentPath = "";
     paths.forEach((path, index) => {

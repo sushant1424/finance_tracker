@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from './ui/switch';
 import { Button } from './ui/button';
 import useFetch from '@/hooks/use-fetch';
-import { createTransaction, getUserAccounts } from '@/actions/accounts';
+import { getUserAccounts } from '@/actions/accounts';
+import { createTransaction } from '@/actions/transactions';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { defaultCategories } from '@/data/categories';

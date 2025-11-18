@@ -3,7 +3,8 @@ import React, { useMemo, useState } from "react";
 import { Sidebar, SidebarLink, useSidebar } from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, Menu, X, LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart } from "lucide-react";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,6 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
     { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 shrink-0" /> },
     { label: "Transactions", href: "/transaction", icon: <ReceiptText className="h-5 w-5 shrink-0" /> },
     { label: "Accounts", href: "/account", icon: <Wallet className="h-5 w-5 shrink-0" /> },
-    { label: "Reports", href: "/reports", icon: <BarChart3 className="h-5 w-5 shrink-0" /> },
     { label: "Budget", href: "/budget", icon: <PiggyBank className="h-5 w-5 shrink-0" /> },
     { label: "Recurring", href: "/recurring", icon: <Repeat className="h-5 w-5 shrink-0" /> },
     { label: "Goals", href: "/goals", icon: <Target className="h-5 w-5 shrink-0" /> },
@@ -30,12 +30,23 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
     { label: "Advice", href: "/advice", icon: <MessageSquare className="h-5 w-5 shrink-0" /> },
   ], []);
 
+  const statisticsLinks = useMemo(() => [
+    { label: "Balance", href: "/statistics/balance", icon: <Wallet className="h-4 w-4" /> },
+    { label: "Cash-flow", href: "/statistics/cash-flow", icon: <TrendingUp className="h-4 w-4" /> },
+    { label: "Spending", href: "/statistics/spending", icon: <PieChart className="h-4 w-4" /> },
+    { label: "Reports", href: "/reports", icon: <BarChart3 className="h-4 w-4" /> },
+  ], []);
+
+  const pathname = usePathname();
   const { user } = useUser();
   const { open, animate } = useSidebar();
   const { signOut } = useClerk();
   const [logoutOpen, setLogoutOpen] = useState(false);
   const firstName = user?.firstName || user?.username ;
   const lastName = user?.lastName || "";
+  const [statisticsOpen, setStatisticsOpen] = useState(() =>
+    pathname.startsWith("/statistics") || pathname === "/reports"
+  );
 
   const handleLogout = () => {
     setLogoutOpen(false);
@@ -50,8 +61,58 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
         </Link>
       )}
       <div className={`${!isMobile ? 'mt-8' : ''} flex flex-col gap-2`}>
-        {links.map((link, idx) => (
+        {links.slice(0, 6).map((link, idx) => (
           <div key={idx} onClick={onLinkClick}>
+            <SidebarLink link={link} forceLabel={isMobile} />
+          </div>
+        ))}
+
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={() => setStatisticsOpen((prev) => !prev)}
+            className={`flex w-full items-center justify-between gap-2 group/sidebar py-2 rounded-xl transition-colors text-white/85 hover:text-white hover:bg-white/10 ${
+              !isMobile && open ? "pl-3 pr-2" : "pl-0 pr-1"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 shrink-0" />
+              <motion.span
+                animate={{
+                  display: animate ? (open ? "inline-block" : "none") : "inline-block",
+                  opacity: animate ? (open ? 1 : 0) : 1,
+                }}
+                className="text-sm text-white group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+              >
+                Statistics
+              </motion.span>
+            </div>
+            <ChevronDown
+              className={`ml-auto h-4 w-4 transition-transform ${statisticsOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {statisticsOpen && (
+            <div className="mt-1 space-y-1">
+              {statisticsLinks.map((link) => (
+                <div key={link.href} onClick={onLinkClick}>
+                  <SidebarLink
+                    link={{
+                      label: link.label,
+                      href: link.href,
+                      icon: link.icon,
+                    }}
+                    forceLabel={isMobile}
+                    className={open ? "pl-6" : "pl-2"}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {links.slice(6).map((link, idx) => (
+          <div key={`secondary-${idx}`} onClick={onLinkClick}>
             <SidebarLink link={link} forceLabel={isMobile} />
           </div>
         ))}

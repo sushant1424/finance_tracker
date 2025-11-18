@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useFetch from '@/hooks/use-fetch';
-import { bulkDeleteTransactions } from '@/actions/accounts';
+import { bulkDeleteTransactions } from '@/actions/transactions';
 import { toast } from 'sonner';
 import { BarLoader } from 'react-spinners';
 import { AllTransactionFilters } from './all-transaction-filters';

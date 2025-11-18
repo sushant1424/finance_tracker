@@ -2,8 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -20,11 +20,11 @@ interface CashflowPoint {
   net: number;
 }
 
-interface CashflowLineChartProps {
+interface CashflowAreaChartProps {
   data: CashflowPoint[];
 }
 
-const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
+const CashflowAreaChart = ({ data }: CashflowAreaChartProps) => {
   const hasData = data.some(
     (point) => point.income !== 0 || point.expense !== 0 || point.net !== 0
   );
@@ -33,17 +33,16 @@ const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
     <Card>
       <CardHeader className="flex flex-col gap-1 pb-4">
         <CardTitle className="text-base font-semibold">
-          Cash Flow Over Time
+          Cash-flow over the last 6 months
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Monthly income, expenses and net cashflow based on your real
-          transactions
+          Income, expenses and net cash-flow trends month by month.
         </p>
       </CardHeader>
       <CardContent className="h-[320px] flex items-center justify-center">
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
+            <AreaChart
               data={data}
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
@@ -63,9 +62,7 @@ const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
                 }
               />
               <Tooltip
-                formatter={(value: number) =>
-                  `NPR ${formatIndianNumber(value as number)}`
-                }
+                formatter={(value: number) => `NPR ${formatIndianNumber(value as number)}`}
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",
@@ -73,35 +70,35 @@ const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
                 }}
               />
               <Legend />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="income"
                 name="Income"
                 stroke="#22c55e"
+                fill="#22c55e33"
                 strokeWidth={2}
-                dot={false}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="expense"
                 name="Expense"
                 stroke="#ef4444"
+                fill="#ef444433"
                 strokeWidth={2}
-                dot={false}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="net"
                 name="Net"
                 stroke="#3b82f6"
+                fill="#3b82f633"
                 strokeWidth={2}
-                dot={false}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           <p className="text-sm text-muted-foreground text-center">
-            No transactions found for the last 6 months.
+            Not enough transactions yet to build a cash-flow chart.
           </p>
         )}
       </CardContent>
@@ -109,4 +106,4 @@ const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
   );
 };
 
-export default CashflowLineChart;
+export default CashflowAreaChart;

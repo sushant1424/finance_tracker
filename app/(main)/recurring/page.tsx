@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Calendar, Repeat, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
-import { getAllUserTransactions } from "@/actions/accounts";
+import { getAllUserTransactions } from "@/actions/transactions";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
 import { formatIndianCurrency, formatIndianNumber } from "@/lib/currency";
 
