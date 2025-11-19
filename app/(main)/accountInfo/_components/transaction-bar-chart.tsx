@@ -151,10 +151,14 @@ const TransactionBarChart = ({ transactions }: { transactions: Transaction[] }) 
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `Rs ${value}`}
+                tickFormatter={(value) => {
+                  const formatted = formatIndianNumber(value as number);
+                  const integerPart = formatted.split(".")[0];
+                  return `Rs ${integerPart}`;
+                }}
               />
               <Tooltip
-                formatter={(value) => [`NPR ${value}`, undefined]}
+                formatter={(value: number) => [`NPR ${formatIndianNumber(value as number)}`, undefined]}
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",

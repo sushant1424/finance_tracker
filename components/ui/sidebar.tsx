@@ -180,7 +180,7 @@ export const SidebarLink = ({
         isActive
           ? "bg-white/20 text-white shadow-inner"
           : "text-white/85 hover:text-white hover:bg-white/10",
-        open ? "pl-3" : "pl-0",
+        open ? "pl-3 pr-2" : "px-2",
         className
       )}
       {...props}

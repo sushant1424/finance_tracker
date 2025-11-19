@@ -58,9 +58,11 @@ const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) =>
-                  `Rs ${Number(value).toLocaleString("en-IN")}`
-                }
+                tickFormatter={(value) => {
+                  const formatted = formatIndianNumber(value as number);
+                  const integerPart = formatted.split(".")[0];
+                  return `Rs ${integerPart}`;
+                }}
               />
               <Tooltip
                 formatter={(value: number) =>

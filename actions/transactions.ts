@@ -28,6 +28,10 @@ interface TransactionData {
   status?: "PENDING" | "COMPLETED" | "FAILED";
 }
 
+interface UpdateTransactionData extends TransactionData {
+  id: string;
+}
+
 const getAllUserTransactionsCached = unstable_cache(
   async (userId: string) => {
     const user = await db.user.findUnique({
@@ -212,6 +216,134 @@ export async function createTransaction(data: TransactionData) {
       });
 
       return transaction;
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/account/[id]");
+    revalidatePath("/accountInfo");
+    revalidatePath("/transaction");
+    revalidateTag("dashboard");
+    revalidateTag("transactions");
+    revalidateTag("accounts");
+    revalidateTag("account-detail");
+    revalidateTag("recurring");
+
+    return { success: true, data: serializeTransaction(result) };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateTransaction(data: UpdateTransactionData) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    const existing = await db.transaction.findFirst({
+      where: {
+        id: data.id,
+        userId: user.id,
+      },
+    });
+
+    if (!existing) throw new Error("Transaction not found");
+
+    const targetAccount = await db.account.findFirst({
+      where: {
+        id: data.accountId,
+        userId: user.id,
+      },
+    });
+
+    if (!targetAccount) throw new Error("Account not found");
+
+    const amountFloat = parseFloat(data.amount.toString());
+    if (isNaN(amountFloat) || amountFloat <= 0) {
+      throw new Error("Invalid amount");
+    }
+
+    const transactionDate = new Date(data.date);
+
+    let nextRecurringDate: Date | null = null;
+    if (data.isRecurring && data.recurringInterval) {
+      nextRecurringDate = new Date(transactionDate);
+      switch (data.recurringInterval) {
+        case "DAILY":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 1);
+          break;
+        case "WEEKLY":
+          nextRecurringDate.setDate(nextRecurringDate.getDate() + 7);
+          break;
+        case "MONTHLY":
+          nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 1);
+          break;
+        case "YEARLY":
+          nextRecurringDate.setFullYear(nextRecurringDate.getFullYear() + 1);
+          break;
+      }
+    }
+
+    const originalAmount = existing.amount.toNumber();
+    const originalSign = existing.type === "INCOME" ? 1 : -1;
+    const newSign = data.type === "INCOME" ? 1 : -1;
+
+    const result = await db.$transaction(async (tx) => {
+      const updated = await tx.transaction.update({
+        where: { id: existing.id },
+        data: {
+          type: data.type,
+          amount: amountFloat,
+          description: data.description || null,
+          date: transactionDate,
+          category: data.category,
+          accountId: data.accountId,
+          isRecurring: data.isRecurring || false,
+          recurringInterval: data.recurringInterval || null,
+          nextRecurringDate,
+          status: data.status || "COMPLETED",
+        },
+      });
+
+      if (existing.accountId === data.accountId) {
+        const delta = newSign * amountFloat - originalSign * originalAmount;
+
+        if (delta !== 0) {
+          await tx.account.update({
+            where: { id: data.accountId },
+            data: {
+              balance: {
+                increment: delta,
+              },
+            },
+          });
+        }
+      } else {
+        await tx.account.update({
+          where: { id: existing.accountId },
+          data: {
+            balance: {
+              increment: -originalSign * originalAmount,
+            },
+          },
+        });
+
+        await tx.account.update({
+          where: { id: data.accountId },
+          data: {
+            balance: {
+              increment: newSign * amountFloat,
+            },
+          },
+        });
+      }
+
+      return updated;
     });
 
     revalidatePath("/dashboard");

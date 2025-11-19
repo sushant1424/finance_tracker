@@ -47,6 +47,7 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
   const [statisticsOpen, setStatisticsOpen] = useState(() =>
     pathname.startsWith("/statistics") || pathname === "/reports"
   );
+  const showStatisticsLabel = isMobile || !animate || open;
 
   const handleLogout = () => {
     setLogoutOpen(false);
@@ -72,15 +73,15 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
             type="button"
             onClick={() => setStatisticsOpen((prev) => !prev)}
             className={`flex w-full items-center justify-between gap-2 group/sidebar py-2 rounded-xl transition-colors text-white/85 hover:text-white hover:bg-white/10 ${
-              !isMobile && open ? "pl-3 pr-2" : "pl-0 pr-1"
+              !isMobile && open ? "pl-3 pr-2" : "px-2"
             }`}
           >
             <div className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 shrink-0" />
               <motion.span
                 animate={{
-                  display: animate ? (open ? "inline-block" : "none") : "inline-block",
-                  opacity: animate ? (open ? 1 : 0) : 1,
+                  display: showStatisticsLabel ? "inline-block" : "none",
+                  opacity: showStatisticsLabel ? 1 : 0,
                 }}
                 className="text-sm text-white group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
               >

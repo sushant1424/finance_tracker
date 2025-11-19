@@ -3,12 +3,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { categoryColors, defaultCategories } from '@/data/categories';
 import { format } from 'date-fns';
-import { Clock, MoreHorizontal, RefreshCw, Trash } from 'lucide-react';
+import { Clock, RefreshCw, Trash, Pencil } from 'lucide-react';
 import { formatIndianNumber } from '@/lib/currency';
 import React, { useState } from 'react';
 import {
@@ -21,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import EditTransactionDrawer from '@/components/edit-transaction-drawer';
 
 const RECURRING_INTERVALS = {
   DAILY: "Daily",
@@ -44,6 +44,7 @@ interface Transaction {
   isRecurring?: boolean;
   recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
   nextRecurringDate?: string;
+  accountId: string;
   account: Account;
 }
 
@@ -140,25 +141,20 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
       </TableCell>
 
       <TableCell>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <div className="flex justify-end gap-2">
+          <EditTransactionDrawer transaction={transaction}>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4"/>
+              <Pencil className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem 
-              className="text-destructive" 
-              onSelect={(event) => {
-                event.preventDefault();
-                setConfirmOpen(true);
-              }}
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </EditTransactionDrawer>
+          <Button
+            variant="ghost"
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+            onClick={() => setConfirmOpen(true)}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </div>
         <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>

@@ -179,9 +179,11 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) =>
-                      `Rs ${formatIndianNumber(value as number)}`
-                    }
+                    tickFormatter={(value) => {
+                      const formatted = formatIndianNumber(value as number);
+                      const integerPart = formatted.split(".")[0];
+                      return `Rs ${integerPart}`;
+                    }}
                   />
                   <YAxis
                     type="category"
