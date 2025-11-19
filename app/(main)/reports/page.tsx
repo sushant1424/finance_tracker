@@ -2,17 +2,22 @@ import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatIndianCurrency } from "@/lib/currency";
-import CashflowLineChart from "./_components/cashflow-line-chart";
-import ReportsExportTable from "./_components/reports-export-table";
+import MonthlyOverviewReport from "./_components/reports-export-table";
+import LossMonthsReport from "./_components/loss-months-report";
+import BestMonthsReport from "./_components/best-months-report";
 
 import { getReportsData } from "@/actions/reports";
 
 const ReportsPage = async () => {
   const { chartData, totalIncome, totalExpense, net } = await getReportsData();
 
-  const months = chartData.length || 1;
-  const avgNet = net / months;
   const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
+
+  const lossMonths = chartData.filter((m) => m.expense > m.income);
+  const bestMonths = [...chartData]
+    .filter((m) => m.net > 0)
+    .sort((a, b) => b.net - a.net)
+    .slice(0, 3);
 
   return (
     <div className="space-y-6 pb-8">
@@ -23,7 +28,7 @@ const ReportsPage = async () => {
           Reports
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Overview of your income, expenses and net cash-flow for the last 6 months.
+          Focused reports to help you see where money is going and where you can improve.
         </p>
       </div>
 
@@ -82,17 +87,18 @@ const ReportsPage = async () => {
               {isNaN(savingsRate) ? "—" : `${savingsRate.toFixed(1)}%`}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              A healthy long-term goal is usually 20%+ of your income.
+              Aim for 20%+ over time to steadily build savings.
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2">
-          <CashflowLineChart data={chartData} />
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <MonthlyOverviewReport data={chartData} />
+        <div className="space-y-4">
+          <LossMonthsReport data={lossMonths} />
+          <BestMonthsReport data={bestMonths} />
         </div>
-        <ReportsExportTable data={chartData} />
       </div>
     </div>
   );

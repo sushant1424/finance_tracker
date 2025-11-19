@@ -105,7 +105,7 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-1 pb-4">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-4">
         <div className="flex flex-col gap-1">
           <CardTitle className="text-base font-semibold">
             Spending by category
@@ -130,43 +130,60 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="h-[360px] flex items-center justify-center">
+      <CardContent>
         {hasData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full">
-            <div className="h-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="amount"
-                    nameKey="category"
-                    innerRadius={50}
-                    outerRadius={90}
-                    paddingAngle={2}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+            <div className="flex flex-col">
+              <div className="h-[260px] sm:h-[280px] lg:h-[320px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      dataKey="amount"
+                      nameKey="category"
+                      innerRadius={50}
+                      outerRadius={90}
+                      paddingAngle={2}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell
+                          key={entry.category}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: number) =>
+                        `NPR ${formatIndianNumber(value as number)}`
+                      }
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "var(--radius)",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-3 mb-4 flex flex-wrap gap-2 text-xs">
+                {pieData.map((entry, index) => (
+                  <div
+                    key={entry.category}
+                    className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-background/60"
                   >
-                    {pieData.map((entry, index) => (
-                      <Cell
-                        key={entry.category}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) =>
-                      `NPR ${formatIndianNumber(value as number)}`
-                    }
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span className="max-w-[120px] truncate">
+                      {entry.category}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="h-full">
+            <div className="h-[260px] sm:h-[280px] lg:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={barData}
@@ -211,7 +228,7 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-sm text-muted-foreground text-center py-6">
             Not enough expense transactions yet to show spending by category.
           </p>
         )}

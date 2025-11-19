@@ -21,11 +21,11 @@ interface CashflowPoint {
   net: number;
 }
 
-interface ReportsExportTableProps {
+interface BestMonthsReportProps {
   data: CashflowPoint[];
 }
 
-const ReportsExportTable: React.FC<ReportsExportTableProps> = ({ data }) => {
+const BestMonthsReport: React.FC<BestMonthsReportProps> = ({ data }) => {
   const hasData = data.length > 0;
 
   const handleExportCSV = () => {
@@ -57,7 +57,7 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({ data }) => {
 
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "cashflow-report.csv");
+    link.setAttribute("download", "best-months-report.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -66,34 +66,32 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({ data }) => {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3 space-y-2">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <CardHeader className="pb-3 space-y-1">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="text-sm font-semibold">
-              Monthly overview (last 6 months)
+              Your strongest months
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Export this report as CSV and open it in Excel or Sheets.
+              Months with the highest positive net cash-flow.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="default"
-              className="gap-1"
-              onClick={handleExportCSV}
-              disabled={!hasData}
-            >
-              <Download className="h-3 w-3" />
-              <span className="text-xs">Export CSV</span>
-            </Button>
-          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            onClick={handleExportCSV}
+            disabled={!hasData}
+          >
+            <Download className="h-3 w-3" />
+            <span className="text-xs">Export CSV</span>
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-x-auto">
         {hasData ? (
-          <Table className="min-w-[360px] text-xs">
+          <Table className="min-w-[320px] text-xs">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[120px]">Month</TableHead>
@@ -112,12 +110,8 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({ data }) => {
                   <TableCell className="text-right">
                     NPR {formatIndianNumber(row.expense)}
                   </TableCell>
-                  <TableCell
-                    className={`text-right font-semibold ${
-                      row.net >= 0 ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {row.net >= 0 ? "+" : "-"}NPR {formatIndianNumber(Math.abs(row.net))}
+                  <TableCell className="text-right font-semibold text-green-600">
+                    +NPR {formatIndianNumber(row.net)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -125,8 +119,7 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({ data }) => {
           </Table>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Not enough data yet to generate a detailed report. Add a few
-            transactions and come back.
+            Not enough data yet to highlight your strongest months.
           </p>
         )}
       </CardContent>
@@ -134,4 +127,4 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({ data }) => {
   );
 };
 
-export default ReportsExportTable;
+export default BestMonthsReport;
