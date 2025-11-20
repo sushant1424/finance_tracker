@@ -62,6 +62,7 @@ const CreateTransactionDrawer = ({ children }: CreateTransactionDrawerProps) => 
       isRecurring: false,
       recurringInterval: undefined as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | undefined,
       status: 'COMPLETED' as const,
+      currency: 'NPR',
     },
   });
 
@@ -167,13 +168,30 @@ const CreateTransactionDrawer = ({ children }: CreateTransactionDrawerProps) => 
                   {/* Amount */}
                   <div className="space-y-2">
                     <Label htmlFor="amount">Amount *</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...register('amount')}
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="flex-1"
+                        {...register('amount')}
+                      />
+                      <div className="w-[110px]">
+                        <Select
+                          value={watch('currency')}
+                          onValueChange={(value: 'NPR' | 'USD') => setValue('currency', value)}
+                        >
+                          <SelectTrigger id="currency">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NPR">NPR</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     {errors.amount && (
                       <p className="text-sm text-red-600">{errors.amount.message as string}</p>
                     )}
@@ -368,7 +386,7 @@ const CreateTransactionDrawer = ({ children }: CreateTransactionDrawerProps) => 
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Transaction</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to create this {watch('type')?.toLowerCase()} transaction of NPR {formatIndianNumber(parseFloat(watch('amount') || '0'))}
+              Are you sure you want to create this {watch('type')?.toLowerCase()} transaction of {watch('currency')} {formatIndianNumber(parseFloat(watch('amount') || '0'))}
               {watch('category') && ` in the ${defaultCategories.find((c) => c.id === watch('category'))?.name} category`}?
               {isRecurring && watch('recurringInterval') && ` This will repeat ${watch('recurringInterval')?.toLowerCase()}.`}
             </AlertDialogDescription>

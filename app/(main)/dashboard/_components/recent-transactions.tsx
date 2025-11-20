@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { categoryColors } from '@/data/categories';
 import { format } from 'date-fns';
 import { ArrowDownLeft, ArrowUpRight, Clock } from 'lucide-react';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayNumber, getCurrencySymbol, type DisplayCurrency } from '@/lib/currency';
 import {
   Select,
   SelectContent,
@@ -34,11 +34,15 @@ interface RecentTransactionsProps {
     id: string;
     name: string;
   }[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 export const RecentTransactions: React.FC<RecentTransactionsProps> = ({
   transactions,
   accounts,
+  displayCurrency,
+  nprPerUsd,
 }) => {
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
 
@@ -154,15 +158,27 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = ({
                   </div>
                 </div>
                 <div className="text-right ml-2">
-                  <p
-                    className={`text-xs sm:text-sm font-bold ${
-                      transaction.type === 'INCOME'
-                        ? 'text-green-600'
-                        : 'text-red-600'
-                    }`}
-                  >
-                    {transaction.type === 'INCOME' ? '+' : '-'}NPR {formatIndianNumber(transaction.amount)}
-                  </p>
+                  {(() => {
+                    const symbol = getCurrencySymbol(displayCurrency);
+                    const formatted = formatDisplayNumber(
+                      transaction.amount,
+                      displayCurrency,
+                      nprPerUsd
+                    );
+                    const sign = transaction.type === 'INCOME' ? '+' : '-';
+                    return (
+                      <p
+                        className={`text-xs sm:text-sm font-bold ${
+                          transaction.type === 'INCOME'
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        {sign}
+                        {symbol} {formatted}
+                      </p>
+                    );
+                  })()}
                   <p className="text-[9px] sm:text-[10px] text-gray-400 mt-1 font-medium whitespace-nowrap">
                     {format(new Date(transaction.date), 'MMM dd')}
                   </p>

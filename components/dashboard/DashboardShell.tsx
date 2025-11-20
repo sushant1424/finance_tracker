@@ -4,7 +4,7 @@ import { Sidebar, SidebarLink, useSidebar } from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart } from "lucide-react";
+import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart, CircleDollarSign } from "lucide-react";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
     { label: "Goals", href: "/goals", icon: <Target className="h-5 w-5 shrink-0" /> },
     { label: "Investments", href: "/investments", icon: <LineChart className="h-5 w-5 shrink-0" /> },
     { label: "Advice", href: "/advice", icon: <MessageSquare className="h-5 w-5 shrink-0" /> },
+    { label: "Currency", href: "/currency", icon: <CircleDollarSign className="h-5 w-5 shrink-0" /> },
   ], []);
 
   const statisticsLinks = useMemo(() => [

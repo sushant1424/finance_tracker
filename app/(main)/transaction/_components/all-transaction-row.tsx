@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { categoryColors, defaultCategories } from '@/data/categories';
 import { format } from 'date-fns';
 import { Clock, RefreshCw, Trash, Pencil } from 'lucide-react';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayNumber, getCurrencySymbol, type DisplayCurrency } from '@/lib/currency';
 import React, { useState } from 'react';
 import {
   AlertDialog,
@@ -53,6 +53,8 @@ interface AllTransactionRowProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDelete: (ids: string[]) => void;
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
@@ -60,6 +62,8 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
   isSelected,
   onSelect,
   onDelete,
+  displayCurrency,
+  nprPerUsd,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -106,7 +110,21 @@ export const AllTransactionRow: React.FC<AllTransactionRowProps> = ({
           transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
         }`}
       >
-        {transaction.type === "EXPENSE" ? "-" : "+"}NPR {formatIndianNumber(transaction.amount)}
+        {(() => {
+          const symbol = getCurrencySymbol(displayCurrency);
+          const formatted = formatDisplayNumber(
+            transaction.amount,
+            displayCurrency,
+            nprPerUsd
+          );
+          const sign = transaction.type === "EXPENSE" ? "-" : "+";
+          return (
+            <>
+              {sign}
+              {symbol} {formatted}
+            </>
+          );
+        })()}
       </TableCell>
 
       <TableCell>

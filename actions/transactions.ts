@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { getFxRates } from "./currency";
 
 const serializeTransaction = (obj: any): any => {
   const serialized = { ...obj };
@@ -26,6 +27,7 @@ interface TransactionData {
   isRecurring?: boolean;
   recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
   status?: "PENDING" | "COMPLETED" | "FAILED";
+  currency?: "NPR" | "USD";
 }
 
 interface UpdateTransactionData extends TransactionData {
@@ -167,6 +169,14 @@ export async function createTransaction(data: TransactionData) {
       throw new Error("Invalid amount");
     }
 
+    const currency = data.currency ?? "NPR";
+    let normalizedAmount = amountFloat;
+
+    if (currency === "USD") {
+      const fx = await getFxRates();
+      normalizedAmount = amountFloat * fx.nprPerUsd;
+    }
+
     const transactionDate = new Date(data.date);
 
     let nextRecurringDate: Date | null = null;
@@ -192,7 +202,7 @@ export async function createTransaction(data: TransactionData) {
       const transaction = await tx.transaction.create({
         data: {
           type: data.type,
-          amount: amountFloat,
+          amount: normalizedAmount,
           description: data.description || null,
           date: transactionDate,
           category: data.category,
@@ -205,7 +215,8 @@ export async function createTransaction(data: TransactionData) {
         },
       });
 
-      const balanceChange = data.type === "INCOME" ? amountFloat : -amountFloat;
+      const balanceChange =
+        data.type === "INCOME" ? normalizedAmount : -normalizedAmount;
       await tx.account.update({
         where: { id: data.accountId },
         data: {
@@ -268,6 +279,14 @@ export async function updateTransaction(data: UpdateTransactionData) {
       throw new Error("Invalid amount");
     }
 
+    const currency = data.currency ?? "NPR";
+    let normalizedAmount = amountFloat;
+
+    if (currency === "USD") {
+      const fx = await getFxRates();
+      normalizedAmount = amountFloat * fx.nprPerUsd;
+    }
+
     const transactionDate = new Date(data.date);
 
     let nextRecurringDate: Date | null = null;
@@ -298,7 +317,7 @@ export async function updateTransaction(data: UpdateTransactionData) {
         where: { id: existing.id },
         data: {
           type: data.type,
-          amount: amountFloat,
+          amount: normalizedAmount,
           description: data.description || null,
           date: transactionDate,
           category: data.category,
@@ -311,7 +330,7 @@ export async function updateTransaction(data: UpdateTransactionData) {
       });
 
       if (existing.accountId === data.accountId) {
-        const delta = newSign * amountFloat - originalSign * originalAmount;
+        const delta = newSign * normalizedAmount - originalSign * originalAmount;
 
         if (delta !== 0) {
           await tx.account.update({
@@ -337,7 +356,7 @@ export async function updateTransaction(data: UpdateTransactionData) {
           where: { id: data.accountId },
           data: {
             balance: {
-              increment: newSign * amountFloat,
+              increment: newSign * normalizedAmount,
             },
           },
         });

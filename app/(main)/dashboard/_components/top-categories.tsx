@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { categoryColors } from '@/data/categories';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayNumber, getCurrencySymbol, type DisplayCurrency } from '@/lib/currency';
 import { TrendingDown } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
@@ -15,10 +15,14 @@ interface Category {
 
 interface TopCategoriesProps {
   categories: Category[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 export const TopCategories: React.FC<TopCategoriesProps> = ({
   categories,
+  displayCurrency,
+  nprPerUsd,
 }) => {
   const chartData = useMemo(() => {
     if (!categories.length) return [];
@@ -88,7 +92,13 @@ export const TopCategories: React.FC<TopCategoriesProps> = ({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `NPR ${formatIndianNumber(value as number)}`}
+                formatter={(value: number) =>
+                  `${getCurrencySymbol(displayCurrency)} ${formatDisplayNumber(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  )}`
+                }
                 contentStyle={{
                   backgroundColor: 'hsl(var(--popover))',
                   border: '1px solid hsl(var(--border))',
@@ -121,7 +131,8 @@ export const TopCategories: React.FC<TopCategoriesProps> = ({
                 </div>
               </div>
               <p className="text-xs font-bold text-gray-900">
-                NPR {formatIndianNumber(cat.value)}
+                {getCurrencySymbol(displayCurrency)}{' '}
+                {formatDisplayNumber(cat.value, displayCurrency, nprPerUsd)}
               </p>
             </div>
           ))}

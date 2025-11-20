@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Wallet, Plus } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayNumber, getCurrencySymbol, type DisplayCurrency } from '@/lib/currency';
 
 interface Account {
   id: string;
@@ -21,10 +21,14 @@ interface Account {
 
 interface AccountsOverviewProps {
   accounts: Account[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
   accounts,
+  displayCurrency,
+  nprPerUsd,
 }) => {
   const sortedAccounts = [...accounts].sort(
     (a, b) => b._count.transactions - a._count.transactions
@@ -103,7 +107,8 @@ export const AccountsOverview: React.FC<AccountsOverviewProps> = ({
                   </div>
                   <div className="text-right">
                     <p className="text-xs sm:text-sm font-bold text-gray-900 whitespace-nowrap">
-                      NPR {formatIndianNumber(account.balance)}
+                      {getCurrencySymbol(displayCurrency)}{' '}
+                      {formatDisplayNumber(account.balance, displayCurrency, nprPerUsd)}
                     </p>
                   </div>
                 </div>

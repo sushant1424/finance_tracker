@@ -1,18 +1,25 @@
 import React, { Suspense } from 'react';
 import { getUserAccounts } from '@/actions/accounts';
 import { getAllUserTransactions } from '@/actions/transactions';
+import { getFxRates, getUserCurrency } from '@/actions/currency';
 import { BarLoader } from 'react-spinners';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import AllTransactionsTable from './_components/all-transactions-table';
 import { Breadcrumb } from '@/components/breadcrumb';
 import CreateTransactionDrawer from '@/components/create-transaction-drawer';
+import type { DisplayCurrency } from '@/lib/currency';
 
 export default async function TransactionsPage() {
-  const [transactions, accounts] = await Promise.all([
+  const [transactions, accounts, fx, userCurrency] = await Promise.all([
     getAllUserTransactions(),
     getUserAccounts(),
+    getFxRates(),
+    getUserCurrency(),
   ]);
+
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
 
   return (
     <div className="space-y-6 pb-8">
@@ -44,7 +51,9 @@ export default async function TransactionsPage() {
             id: acc.id, 
             name: acc.name, 
             type: acc.type 
-          }))} 
+          }))}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
         />
       </Suspense>
     </div>

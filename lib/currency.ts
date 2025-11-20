@@ -48,3 +48,57 @@ export function formatIndianNumber(amount: number): string {
   
   return `${isNegative ? '-' : ''}${formatted}.${decimalPart}`;
 }
+
+export type DisplayCurrency = "NPR" | "USD";
+
+export function convertFromNpr(
+  amountNpr: number,
+  currency: DisplayCurrency,
+  nprPerUsd: number
+): number {
+  if (currency === "NPR") return amountNpr;
+  if (!nprPerUsd || !isFinite(nprPerUsd) || nprPerUsd <= 0) {
+    return amountNpr;
+  }
+  return amountNpr / nprPerUsd;
+}
+
+export function formatDisplayCurrency(
+  amountNpr: number,
+  currency: DisplayCurrency,
+  nprPerUsd: number
+): string {
+  const converted = convertFromNpr(amountNpr, currency, nprPerUsd);
+
+  if (currency === "NPR") {
+    return formatIndianCurrency(converted);
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(converted);
+}
+
+export function formatDisplayNumber(
+  amountNpr: number,
+  currency: DisplayCurrency,
+  nprPerUsd: number
+): string {
+  const converted = convertFromNpr(amountNpr, currency, nprPerUsd);
+
+  if (currency === "NPR") {
+    return formatIndianNumber(converted);
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(converted);
+}
+
+export function getCurrencySymbol(currency: DisplayCurrency): string {
+  return currency === "USD" ? "$" : "NPR";
+}

@@ -74,6 +74,7 @@ const EditTransactionDrawer = ({ transaction, children }: EditTransactionDrawerP
     isRecurring: Boolean(transaction.isRecurring),
     recurringInterval: transaction.recurringInterval ?? undefined,
     status: (transaction.status as TransactionFormValues["status"]) ?? "COMPLETED",
+    currency: "NPR",
   };
 
   const {
@@ -187,13 +188,30 @@ const EditTransactionDrawer = ({ transaction, children }: EditTransactionDrawerP
 
                   <div className="space-y-2">
                     <Label htmlFor="amount">Amount *</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...register("amount")}
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="flex-1"
+                        {...register("amount")}
+                      />
+                      <div className="w-[110px]">
+                        <Select
+                          value={watch("currency")}
+                          onValueChange={(value: "NPR" | "USD") => setValue("currency", value)}
+                        >
+                          <SelectTrigger id="currency">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NPR">NPR</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     {errors.amount && (
                       <p className="text-sm text-red-600">{errors.amount.message as string}</p>
                     )}
@@ -376,7 +394,7 @@ const EditTransactionDrawer = ({ transaction, children }: EditTransactionDrawerP
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Update</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to update this {watch("type")?.toLowerCase()} transaction of NPR {formatIndianNumber(parseFloat(watch("amount") || "0"))}
+              Are you sure you want to update this {watch("type")?.toLowerCase()} transaction of {watch("currency")} {formatIndianNumber(parseFloat(watch("amount") || "0"))}
               {watch("category") &&
                 ` in the ${defaultCategories.find((c) => c.id === watch("category"))?.name} category`}?
               {isRecurring &&

@@ -14,6 +14,7 @@ import { AllTransactionFilters } from './all-transaction-filters';
 import { AllTransactionTableHeader } from './all-transaction-table-header';
 import { AllTransactionRow } from './all-transaction-row';
 import { DeleteConfirmationDialog } from '@/components/deleteConfirmationDialog';
+import type { DisplayCurrency } from '@/lib/currency';
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
@@ -44,11 +45,15 @@ interface SortConfig {
 interface AllTransactionsTableProps {
   transactions: Transaction[];
   accounts: { id: string; name: string; type: string }[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 const AllTransactionsTable: React.FC<AllTransactionsTableProps> = ({ 
   transactions, 
-  accounts 
+  accounts,
+  displayCurrency,
+  nprPerUsd,
 }) => {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -294,6 +299,8 @@ const AllTransactionsTable: React.FC<AllTransactionsTableProps> = ({
                   isSelected={selectedIds.includes(transaction.id)}
                   onSelect={handleSelect}
                   onDelete={deleteFn}
+                  displayCurrency={displayCurrency}
+                  nprPerUsd={nprPerUsd}
                 />
               ))
             )}

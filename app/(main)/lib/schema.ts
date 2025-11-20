@@ -22,6 +22,7 @@ export const transactionSchema = z.object({
     isRecurring: z.boolean().default(false),
     recurringInterval: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']).optional(),
     status: z.enum(['PENDING', 'COMPLETED', 'FAILED']).default('COMPLETED'),
+    currency: z.enum(['NPR', 'USD']).default('NPR'),
 });
 
 export const goalSchema = z.object({
