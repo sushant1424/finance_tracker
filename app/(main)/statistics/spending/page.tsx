@@ -5,23 +5,19 @@ import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import { getSpendingByCategory } from "@/actions/statistics";
 import { getAllUserTransactions } from "@/actions/transactions";
 import { getFxRates, getUserCurrency } from "@/actions/currency";
+import { getReportsData } from "@/actions/reports";
 import SpendingByCategoryChart from "./_components/spending-by-category-chart";
-
-interface ExpenseTransaction {
-  id: string;
-  date: string | Date;
-  type: "INCOME" | "EXPENSE";
-  category: string | null;
-  amount: number;
-}
+import SpendingHeatmap from "@/app/(main)/reports/_components/spending-heatmap";
 
 const SpendingPage = async () => {
-  const [spendingData, allTransactions, fx, userCurrency] = await Promise.all([
-    getSpendingByCategory(),
-    getAllUserTransactions(),
-    getFxRates(),
-    getUserCurrency(),
-  ]);
+  const [spendingData, allTransactions, fx, userCurrency, reports] =
+    await Promise.all([
+      getSpendingByCategory(),
+      getAllUserTransactions(),
+      getFxRates(),
+      getUserCurrency(),
+      getReportsData(),
+    ]);
 
   const displayCurrency = userCurrency as DisplayCurrency;
   const nprPerUsd = fx.nprPerUsd;
@@ -31,6 +27,8 @@ const SpendingPage = async () => {
   const expenseTransactions = allTransactions.filter(
     (tx) => tx.type === "EXPENSE"
   );
+
+  const { dailyExpenses } = reports;
 
   const categoriesCount = chartData.length;
 
@@ -80,11 +78,14 @@ const SpendingPage = async () => {
         </Card>
       </div>
 
-      <SpendingByCategoryChart
-        transactions={expenseTransactions}
-        displayCurrency={displayCurrency}
-        nprPerUsd={nprPerUsd}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)] gap-4">
+        <SpendingByCategoryChart
+          transactions={expenseTransactions}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
+        />
+        <SpendingHeatmap dailyExpenses={dailyExpenses} />
+      </div>
     </div>
   );
 };

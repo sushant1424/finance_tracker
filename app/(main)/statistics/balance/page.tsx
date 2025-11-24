@@ -8,28 +8,15 @@ import BalanceTrendChart from "./_components/balance-trend-chart";
 import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import { getFxRates, getUserCurrency } from "@/actions/currency";
 import { format } from "date-fns";
-
-interface UserAccount {
-  id: string;
-  name: string;
-  type: "SAVINGS" | "INCOME" | "EXPENSE";
-  balance?: number | null;
-  isDefault?: boolean | null;
-}
-
-interface UserTransaction {
-  id: string;
-  date: string | Date;
-  type: "INCOME" | "EXPENSE";
-  amount: number;
-}
+import { getReportsData } from "@/actions/reports";
 
 const BalancePage = async () => {
-  const [accounts, transactions, fx, userCurrency] = await Promise.all([
+  const [accounts, transactions, fx, userCurrency, reports] = await Promise.all([
     getUserAccounts(),
     getAllUserTransactions(),
     getFxRates(),
     getUserCurrency(),
+    getReportsData(),
   ]);
 
   const displayCurrency = userCurrency as DisplayCurrency;
@@ -63,6 +50,19 @@ const BalancePage = async () => {
     const dateKey = format(tx.date, "yyyy-MM-dd");
     dailyNetMap.set(dateKey, (dailyNetMap.get(dateKey) ?? 0) + change);
   }
+
+  const trendMonths = Math.min(reports.chartData.length, 6);
+  const recentMonths = reports.chartData.slice(-trendMonths);
+  const avgMonthlyNet =
+    trendMonths > 0
+      ? recentMonths.reduce((sum, m) => sum + m.net, 0) / trendMonths
+      : 0;
+
+  const today = new Date();
+  const monthsRemaining = Math.max(1, 12 - (today.getMonth() + 1));
+
+  const projectedNextMonthBalance = totalBalance + avgMonthlyNet;
+  const projectedYearEndBalance = totalBalance + avgMonthlyNet * monthsRemaining;
 
   const initialBalance = totalBalance - totalNetChange;
 
@@ -138,6 +138,26 @@ const BalancePage = async () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">Balance projection</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-xs text-muted-foreground">Expected next month</p>
+            <p className="text-lg font-bold">
+              {formatDisplayCurrency(projectedNextMonthBalance, displayCurrency, nprPerUsd)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Expected at year end</p>
+            <p className="text-lg font-bold">
+              {formatDisplayCurrency(projectedYearEndBalance, displayCurrency, nprPerUsd)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <BalanceTrendChart

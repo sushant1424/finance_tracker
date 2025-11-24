@@ -178,9 +178,13 @@ export const SidebarLink = ({
       className={cn(
         "flex items-center justify-start gap-2 group/sidebar py-2 rounded-xl transition-colors",
         isActive
-          ? "bg-white/20 text-white shadow-inner"
+          ? open
+            ? "bg-white/20 text-white shadow-inner"
+            : "text-white"
           : "text-white/85 hover:text-white hover:bg-white/10",
         open ? "pl-3 pr-2" : "px-2",
+        !open && isActive &&
+          "relative before:content-[''] before:absolute before:left-0 before:top-1 before:bottom-1 before:w-1 before:rounded-full before:bg-white/80",
         className
       )}
       {...props}

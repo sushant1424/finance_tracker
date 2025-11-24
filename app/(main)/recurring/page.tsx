@@ -5,7 +5,7 @@ import { Plus, Calendar, Repeat, DollarSign, TrendingUp, TrendingDown } from "lu
 import { getAllUserTransactions } from "@/actions/transactions";
 import { getFxRates, getUserCurrency } from "@/actions/currency";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
-import { formatDisplayCurrency, formatDisplayNumber, type DisplayCurrency } from "@/lib/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { categoryColors } from "@/data/categories";
 

@@ -1,6 +1,5 @@
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFxRates, getUserCurrency } from "@/actions/currency";
 import CurrencySettings from "./_components/currency-settings";
 import FxInsights from "./_components/fx-insights";
