@@ -6,6 +6,8 @@ import MonthlyOverviewReport from "./_components/reports-export-table";
 import LossMonthsReport from "./_components/loss-months-report";
 import BestMonthsReport from "./_components/best-months-report";
 import CashflowLineChart from "./_components/cashflow-line-chart";
+import SpendingHeatmap from "./_components/spending-heatmap";
+import PeriodCompare from "./_components/period-compare";
 
 import { getReportsData } from "@/actions/reports";
 import { getFxRates, getUserCurrency } from "@/actions/currency";
@@ -17,7 +19,7 @@ const ReportsPage = async () => {
     getUserCurrency(),
   ]);
 
-  const { chartData, totalIncome, totalExpense, net } = reports;
+  const { chartData, totalIncome, totalExpense, net, dailyExpenses } = reports;
   const displayCurrency = userCurrency as DisplayCurrency;
   const nprPerUsd = fx.nprPerUsd;
 
@@ -28,6 +30,39 @@ const ReportsPage = async () => {
     .filter((m) => m.net > 0)
     .sort((a, b) => b.net - a.net)
     .slice(0, 3);
+
+  const monthsCount = chartData.length || 1;
+  const averageNet = monthsCount > 0 ? net / monthsCount : 0;
+  const volatilityScore =
+    monthsCount > 1
+      ? chartData.reduce((sum, m) => sum + Math.abs(m.net - averageNet), 0) /
+        monthsCount
+      : 0;
+
+  let lifestyleIndex = 50;
+  if (totalIncome > 0) {
+    lifestyleIndex += savingsRate / 2;
+  }
+  if (lossMonths.length > 0) {
+    lifestyleIndex -= lossMonths.length * 3;
+  }
+  if (volatilityScore > 0 && totalIncome > 0 && monthsCount > 0) {
+    const avgIncomePerMonth = totalIncome / monthsCount;
+    if (avgIncomePerMonth > 0) {
+      const volRatio = Math.min(1, volatilityScore / avgIncomePerMonth);
+      lifestyleIndex -= volRatio * 15;
+    }
+  }
+  lifestyleIndex = Math.max(0, Math.min(100, lifestyleIndex));
+
+  const lifestyleLabel =
+    lifestyleIndex >= 75
+      ? "Very disciplined"
+      : lifestyleIndex >= 60
+      ? "Balanced"
+      : lifestyleIndex >= 45
+      ? "Needs attention"
+      : "High risk";
 
   return (
     <div className="space-y-6 pb-8">
@@ -103,26 +138,100 @@ const ReportsPage = async () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <CashflowLineChart
-          data={chartData}
-          displayCurrency={displayCurrency}
-          nprPerUsd={nprPerUsd}
-        />
-        <MonthlyOverviewReport
-          data={chartData}
-          displayCurrency={displayCurrency}
-          nprPerUsd={nprPerUsd}
-        />
-      </div>
+      <div className="space-y-6">
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Basic reports
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Monthly spending, income and trend visualisation for the last few months.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <CashflowLineChart
+              data={chartData}
+              displayCurrency={displayCurrency}
+              nprPerUsd={nprPerUsd}
+            />
+            <MonthlyOverviewReport
+              data={chartData}
+              displayCurrency={displayCurrency}
+              nprPerUsd={nprPerUsd}
+            />
+          </div>
+        </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <LossMonthsReport data={lossMonths} />
-        <BestMonthsReport
-          data={bestMonths}
-          displayCurrency={displayCurrency}
-          nprPerUsd={nprPerUsd}
-        />
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Advanced reports
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Focus on loss-making months, your strongest months and export them to Excel for
+              deeper comparison.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <LossMonthsReport data={lossMonths} />
+            <BestMonthsReport
+              data={bestMonths}
+              displayCurrency={displayCurrency}
+              nprPerUsd={nprPerUsd}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Compare periods
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Quickly compare two months, quarters or years side-by-side.
+            </p>
+          </div>
+          <PeriodCompare
+            data={chartData}
+            displayCurrency={displayCurrency}
+            nprPerUsd={nprPerUsd}
+          />
+        </section>
+
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Unique insights
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Lifestyle index and a calendar-style spending heatmap for the current month.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-semibold">
+                  Lifestyle index
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p className="text-3xl font-bold">
+                  {Math.round(lifestyleIndex)}
+                  <span className="ml-1 text-xs text-muted-foreground">/100</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  A higher score means your savings rate is healthy and your month-to-month
+                  cashflow is relatively stable.
+                </p>
+                <p className="text-xs font-medium">
+                  Current assessment: <span className="capitalize">{lifestyleLabel}</span>
+                </p>
+              </CardContent>
+            </Card>
+
+            <SpendingHeatmap dailyExpenses={dailyExpenses} />
+          </div>
+        </section>
       </div>
     </div>
   );

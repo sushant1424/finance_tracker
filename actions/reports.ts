@@ -6,10 +6,16 @@ import { unstable_cache } from "next/cache";
 import { subMonths, startOfMonth, endOfMonth, format } from "date-fns";
 
 interface MonthlyCashflowPoint {
+  monthKey: string;
   month: string;
   income: number;
   expense: number;
   net: number;
+}
+
+interface DailyExpensePoint {
+  date: string;
+  expense: number;
 }
 
 interface ReportsData {
@@ -17,6 +23,7 @@ interface ReportsData {
   totalIncome: number;
   totalExpense: number;
   net: number;
+  dailyExpenses: DailyExpensePoint[];
 }
 
 const getReportsDataCached = unstable_cache(
@@ -47,6 +54,8 @@ const getReportsDataCached = unstable_cache(
       { monthKey: string; label: string; income: number; expense: number }
     > = {};
 
+    const byDay: Record<string, { dateKey: string; expense: number }> = {};
+
     transactions.forEach((tx) => {
       const monthKey = format(tx.date, "yyyy-MM-01");
       const label = format(tx.date, "MMM yyyy");
@@ -62,16 +71,32 @@ const getReportsDataCached = unstable_cache(
         byMonth[monthKey].income += tx.amount.toNumber();
       } else {
         byMonth[monthKey].expense += tx.amount.toNumber();
+        const dayKey = format(tx.date, "yyyy-MM-dd");
+        if (!byDay[dayKey]) {
+          byDay[dayKey] = {
+            dateKey: dayKey,
+            expense: 0,
+          };
+        }
+        byDay[dayKey].expense += tx.amount.toNumber();
       }
     });
 
     const chartData = Object.values(byMonth)
       .sort((a, b) => a.monthKey.localeCompare(b.monthKey))
       .map((m) => ({
+        monthKey: m.monthKey,
         month: m.label,
         income: m.income,
         expense: m.expense,
         net: m.income - m.expense,
+      }));
+
+    const dailyExpenses = Object.values(byDay)
+      .sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+      .map((d) => ({
+        date: d.dateKey,
+        expense: d.expense,
       }));
 
     const totalIncome = chartData.reduce((sum, m) => sum + m.income, 0);
@@ -83,6 +108,7 @@ const getReportsDataCached = unstable_cache(
       totalIncome,
       totalExpense,
       net,
+      dailyExpenses,
     };
   },
   ["reports-data"],

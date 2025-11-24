@@ -6,9 +6,7 @@ const BudgetPage = async () => {
   const overview = await getBudgetOverview();
 
   return (
-    <div className="space-y-4">
-      <BudgetClient overview={overview} />
-    </div>
+    <BudgetClient overview={overview} />
   );
 };
 

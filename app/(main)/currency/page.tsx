@@ -25,49 +25,9 @@ const CurrencyPage = async () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <CurrencySettings defaultCurrency={defaultCurrency} fx={fx} />
-          <FxInsights fx={fx} />
-        </div>
-
-        <Card className="h-full border border-muted/60 bg-gradient-to-b from-background to-muted/30">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold">Data source</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              Exchange rates are fetched from the open access endpoint of
-              {" "}
-              <a
-                href="https://www.exchangerate-api.com"
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-2"
-              >
-                ExchangeRate-API
-              </a>
-              .
-            </p>
-            <p>
-              Rates typically update once per day. Values shown in charts and
-              summaries are approximate and for informational purposes only.
-            </p>
-            <p className="text-xs text-muted-foreground/80">
-              Rates By
-              {" "}
-              <a
-                href="https://www.exchangerate-api.com"
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-2"
-              >
-                Exchange Rate API
-              </a>
-              .
-            </p>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
+        <CurrencySettings defaultCurrency={defaultCurrency} fx={fx} />
+        <FxInsights fx={fx} />
       </div>
     </div>
   );

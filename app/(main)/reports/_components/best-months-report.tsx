@@ -79,7 +79,8 @@ const BestMonthsReport: React.FC<BestMonthsReportProps> = ({
               Your strongest months
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Months with the highest positive net cash-flow.
+              Months with the highest positive net cash-flow. Export to Excel to compare
+              months side-by-side.
             </p>
           </div>
           <Button
@@ -91,7 +92,7 @@ const BestMonthsReport: React.FC<BestMonthsReportProps> = ({
             disabled={!hasData}
           >
             <Download className="h-3 w-3" />
-            <span className="text-xs">Export CSV</span>
+            <span className="text-xs">Export CSV (Excel)</span>
           </Button>
         </div>
       </CardHeader>

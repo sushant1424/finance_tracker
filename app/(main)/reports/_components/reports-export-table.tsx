@@ -79,7 +79,7 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({
               Monthly overview (last 6 months)
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Export this report as CSV and open it in Excel or Sheets.
+              Export this report as CSV and open it in Excel or Google Sheets.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -92,7 +92,7 @@ const ReportsExportTable: React.FC<ReportsExportTableProps> = ({
               disabled={!hasData}
             >
               <Download className="h-3 w-3" />
-              <span className="text-xs">Export CSV</span>
+              <span className="text-xs">Export CSV (Excel)</span>
             </Button>
           </div>
         </div>

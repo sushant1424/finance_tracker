@@ -112,8 +112,7 @@ const getDashboardDataCached = unstable_cache(
           return b.amount - a.amount;
         }
         return b.count - a.count;
-      })
-      .slice(0, 5);
+      });
 
     const categoryBreakdownTotal = categoryBreakdown.reduce(
       (sum, category) => sum + category.amount,

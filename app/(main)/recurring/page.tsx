@@ -7,6 +7,7 @@ import { getFxRates, getUserCurrency } from "@/actions/currency";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
 import { formatDisplayCurrency, formatDisplayNumber, type DisplayCurrency } from "@/lib/currency";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { categoryColors } from "@/data/categories";
 
 // Define proper types
 interface Transaction {
@@ -182,10 +183,37 @@ export default async function RecurringPage() {
                 <p className="text-[11px] text-gray-500 mt-1">
                   Based on upcoming recurring items in the next 10 days.
                 </p>
+                <p className="text-[11px] text-purple-700 mt-1 font-medium">
+                  You have {formatDisplayCurrency(upcomingExpenses, displayCurrency, nprPerUsd)} of
+                  recurring expenses coming in the next 10 days.
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        <Card className="border-dashed border-slate-200 bg-slate-50/60">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">
+              Smart recurring assistant
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-slate-700 space-y-2">
+            <p>
+              Categories are color-coded so you can quickly see where your recurring money goes
+              each month.
+            </p>
+            <p>
+              Upcoming bills are highlighted using each transaction&apos;s next recurring date so you
+              can treat this page as a bill reminder dashboard.
+            </p>
+            <p>
+              Over time, simple pattern detection can identify repeated transactions and suggest
+              marking them as recurring. Future updates can also add retry logic for failed
+              auto-payments and better handling when you change recurring amounts mid-cycle.
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Upcoming Recurring */}
         <Card>
@@ -219,10 +247,16 @@ export default async function RecurringPage() {
                       <h3 className="font-semibold text-gray-900">
                         {item.name || item.description || 'Unnamed Transaction'}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">
                           {frequency}
                         </Badge>
+                        <span
+                          className="text-[10px] font-medium px-2 py-0.5 rounded-full text-white shadow-sm"
+                          style={{ background: categoryColors[item.category] || "#4b5563" }}
+                        >
+                          {item.category}
+                        </span>
                         <span className="text-sm text-gray-600">
                           Next: {new Date(nextDate).toLocaleDateString()}
                         </span>
@@ -235,9 +269,6 @@ export default async function RecurringPage() {
                     }`}>
                       {item.type === "INCOME" ? "+" : "-"}
                       {formatDisplayCurrency(item.amount, displayCurrency, nprPerUsd)}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {item.category}
                     </div>
                   </div>
                 </div>
@@ -283,11 +314,14 @@ export default async function RecurringPage() {
                       <h3 className="font-medium text-gray-900">
                         {item.name || item.description || 'Unnamed Transaction'}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           {frequency}
                         </Badge>
-                        <span className="text-xs text-gray-600">
+                        <span
+                          className="text-[10px] font-medium px-2 py-0.5 rounded-full text-white shadow-sm"
+                          style={{ background: categoryColors[item.category] || "#4b5563" }}
+                        >
                           {item.category}
                         </span>
                       </div>

@@ -20,10 +20,9 @@ const AccountPage = async () => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <CreateAccountDrawer>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow  border-dashed ">
-          <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5">
-
-            <Plus className = "h-10 w-10 mb-2"/>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow border-dashed h-full flex flex-col">
+          <CardContent className="flex-1 flex flex-col items-center justify-center text-muted-foreground pt-5">
+            <Plus className="h-10 w-10 mb-2" />
             <p className="font-medium text-sm">Create New Account</p>
           </CardContent>
         </Card>
