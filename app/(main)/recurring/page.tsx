@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Calendar, Repeat, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { getAllUserTransactions } from "@/actions/transactions";
+import { getFxRates, getUserCurrency } from "@/actions/currency";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
-import { formatIndianCurrency, formatIndianNumber } from "@/lib/currency";
+import { formatDisplayCurrency, formatDisplayNumber, type DisplayCurrency } from "@/lib/currency";
 import { Breadcrumb } from "@/components/breadcrumb";
 
 // Define proper types
@@ -28,7 +29,15 @@ async function getRecurringTransactions(transactions: Transaction[]) {
 
 // Get recurring data
 export default async function RecurringPage() {
-  const allTransactions = await getAllUserTransactions();
+  const [allTransactions, fx, userCurrency] = await Promise.all([
+    getAllUserTransactions(),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
+
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
+
   const recurring = await getRecurringTransactions(allTransactions);
 
   const recurringData = recurring;
@@ -101,7 +110,7 @@ export default async function RecurringPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {formatIndianCurrency(monthlyIncome)}
+                {formatDisplayCurrency(monthlyIncome, displayCurrency, nprPerUsd)}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 {recurringData.filter((r: Transaction) => r.type === "INCOME").length} recurring sources
@@ -116,7 +125,7 @@ export default async function RecurringPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {formatIndianCurrency(monthlyExpenses)}
+                {formatDisplayCurrency(monthlyExpenses, displayCurrency, nprPerUsd)}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 {recurringData.filter((r: Transaction) => r.type === "EXPENSE").length} recurring expenses
@@ -133,7 +142,7 @@ export default async function RecurringPage() {
               <div className={`text-2xl font-bold ${
                 netMonthly >= 0 ? "text-green-600" : "text-red-600"
               }`}>
-                {formatIndianCurrency(netMonthly)}
+                {formatDisplayCurrency(netMonthly, displayCurrency, nprPerUsd)}
               </div>
               <p className="text-xs text-gray-600 mt-1">
                 After recurring transactions
@@ -151,13 +160,13 @@ export default async function RecurringPage() {
                 <div className="flex items-center justify-between text-xs text-gray-700">
                   <span>Incoming</span>
                   <span className="font-medium text-emerald-600">
-                    {formatIndianCurrency(upcomingIncome)}
+                    {formatDisplayCurrency(upcomingIncome, displayCurrency, nprPerUsd)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-700">
                   <span>Outgoing</span>
                   <span className="font-medium text-red-600">
-                    {formatIndianCurrency(upcomingExpenses)}
+                    {formatDisplayCurrency(upcomingExpenses, displayCurrency, nprPerUsd)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-700 mt-1">
@@ -167,7 +176,7 @@ export default async function RecurringPage() {
                       upcomingNet >= 0 ? "text-emerald-600" : "text-red-600"
                     }`}
                   >
-                    {formatIndianCurrency(upcomingNet)}
+                    {formatDisplayCurrency(upcomingNet, displayCurrency, nprPerUsd)}
                   </span>
                 </div>
                 <p className="text-[11px] text-gray-500 mt-1">
@@ -224,7 +233,8 @@ export default async function RecurringPage() {
                     <div className={`text-lg font-bold ${
                       item.type === "INCOME" ? "text-green-600" : "text-red-600"
                     }`}>
-                      {item.type === "INCOME" ? "+" : "-"}NPR {formatIndianNumber(item.amount)}
+                      {item.type === "INCOME" ? "+" : "-"}
+                      {formatDisplayCurrency(item.amount, displayCurrency, nprPerUsd)}
                     </div>
                     <div className="text-sm text-gray-600">
                       {item.category}
@@ -287,7 +297,8 @@ export default async function RecurringPage() {
                     <div className={`text-lg font-semibold ${
                       item.type === "INCOME" ? "text-green-600" : "text-red-600"
                     }`}>
-                      {item.type === "INCOME" ? "+" : "-"}NPR {formatIndianNumber(item.amount)}
+                      {item.type === "INCOME" ? "+" : "-"}
+                      {formatDisplayCurrency(item.amount, displayCurrency, nprPerUsd)}
                     </div>
                     <div className="text-xs text-gray-600">
                       Next: {new Date(nextDate).toLocaleDateString()}

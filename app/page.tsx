@@ -12,28 +12,35 @@ export default function Home() {
       {/*Header*/}
       <Header />
 
-      <section className="relative flex min-h-[calc(100vh-80px)] w-full items-center justify-center overflow-hidden bg-white">
-        
-        <HeroSectionDemo/>
+      <section
+        id="hero"
+        className="relative flex min-h-[calc(100vh-80px)] w-full items-center justify-center overflow-hidden bg-white motion-safe:animate-appear-zoom"
+      >
+        <HeroSectionDemo />
       </section>
 
-
-      
-
       {/*Wobble Finance Section*/}
-      <section className = "bg-gray-50">
+      <section
+        id="wobble"
+        className="bg-gray-50 scroll-mt-24 motion-safe:animate-appear"
+      >
         <WobbleFinanceSection />
       </section>
 
-
-       {/* Features Section */}
-       <section >
-          <FeaturesSection />
+      {/* Features Section */}
+      <section
+        id="features"
+        className="scroll-mt-24 motion-safe:animate-appear"
+      >
+        <FeaturesSection />
       </section>
 
-      {/* Features Section */}
-       <section >
-          <PricingCards />
+      {/* Pricing Section */}
+      <section
+        id="pricing"
+        className="scroll-mt-24 motion-safe:animate-appear"
+      >
+        <PricingCards />
       </section>
 
 
@@ -69,8 +76,8 @@ export default function Home() {
                 <p className="font-semibold text-gray-800">Company</p>
                 <ul className="space-y-1 text-gray-600">
                   <li><a href="mailto:hello@example.com" className="hover:text-blue-600">Contact</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Privacy</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Terms</a></li>
+                  <li><a href="/privacy" className="hover:text-blue-600">Privacy</a></li>
+                  <li><a href="/terms" className="hover:text-blue-600">Terms</a></li>
                 </ul>
               </div>
             </div>

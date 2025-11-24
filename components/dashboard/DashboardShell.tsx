@@ -246,6 +246,7 @@ const DashboardContent: React.FC<{ children: React.ReactNode }> = ({ children })
                       size="icon"
                       onClick={() => setMobileMenuOpen(false)}
                       className="h-8 w-8"
+                      aria-label="Close sidebar menu"
                     >
                       <X className="h-5 w-5" />
                     </Button>
@@ -270,6 +271,7 @@ const DashboardContent: React.FC<{ children: React.ReactNode }> = ({ children })
               size="icon"
               onClick={() => setMobileMenuOpen(true)}
               className="h-9 w-9"
+              aria-label="Open sidebar menu"
             >
               <Menu className="h-5 w-5" />
             </Button>

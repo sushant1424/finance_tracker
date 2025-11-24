@@ -1,12 +1,21 @@
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatIndianCurrency } from "@/lib/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import { getReportsData } from "@/actions/reports";
+import { getFxRates, getUserCurrency } from "@/actions/currency";
 import CashflowAreaChart from "./_components/cashflow-area-chart";
 
 const CashflowPage = async () => {
-  const { chartData, totalIncome, totalExpense, net } = await getReportsData();
+  const [reports, fx, userCurrency] = await Promise.all([
+    getReportsData(),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
+
+  const { chartData, totalIncome, totalExpense, net } = reports;
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
 
   const months = chartData.length || 1;
   const avgNet = net / months;
@@ -31,7 +40,7 @@ const CashflowPage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
-              {formatIndianCurrency(totalIncome)}
+              {formatDisplayCurrency(totalIncome, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -42,7 +51,7 @@ const CashflowPage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
-              {formatIndianCurrency(totalExpense)}
+              {formatDisplayCurrency(totalExpense, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -57,13 +66,17 @@ const CashflowPage = async () => {
                 avgNet >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              {formatIndianCurrency(avgNet)} / month
+              {formatDisplayCurrency(avgNet, displayCurrency, nprPerUsd)} / month
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <CashflowAreaChart data={chartData} />
+      <CashflowAreaChart
+        data={chartData}
+        displayCurrency={displayCurrency}
+        nprPerUsd={nprPerUsd}
+      />
     </div>
   );
 };

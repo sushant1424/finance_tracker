@@ -1,16 +1,25 @@
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatIndianCurrency } from "@/lib/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import MonthlyOverviewReport from "./_components/reports-export-table";
 import LossMonthsReport from "./_components/loss-months-report";
 import BestMonthsReport from "./_components/best-months-report";
 import CashflowLineChart from "./_components/cashflow-line-chart";
 
 import { getReportsData } from "@/actions/reports";
+import { getFxRates, getUserCurrency } from "@/actions/currency";
 
 const ReportsPage = async () => {
-  const { chartData, totalIncome, totalExpense, net } = await getReportsData();
+  const [reports, fx, userCurrency] = await Promise.all([
+    getReportsData(),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
+
+  const { chartData, totalIncome, totalExpense, net } = reports;
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
 
   const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
 
@@ -40,7 +49,7 @@ const ReportsPage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
-              {formatIndianCurrency(totalIncome)}
+              {formatDisplayCurrency(totalIncome, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -51,7 +60,7 @@ const ReportsPage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
-              {formatIndianCurrency(totalExpense)}
+              {formatDisplayCurrency(totalExpense, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -66,7 +75,7 @@ const ReportsPage = async () => {
                 net >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              {formatIndianCurrency(net)}
+              {formatDisplayCurrency(net, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -95,13 +104,25 @@ const ReportsPage = async () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <CashflowLineChart data={chartData} />
-        <MonthlyOverviewReport data={chartData} />
+        <CashflowLineChart
+          data={chartData}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
+        />
+        <MonthlyOverviewReport
+          data={chartData}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
+        />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <LossMonthsReport data={lossMonths} />
-        <BestMonthsReport data={bestMonths} />
+        <BestMonthsReport
+          data={bestMonths}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
+        />
       </div>
     </div>
   );

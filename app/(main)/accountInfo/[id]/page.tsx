@@ -4,7 +4,8 @@ import { BarLoader } from "react-spinners";
 import { notFound } from "next/navigation";
 import TransactionTable from "../_components/transaction-table";
 import { Breadcrumb } from '@/components/breadcrumb';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayCurrency, type DisplayCurrency } from '@/lib/currency';
+import { getFxRates, getUserCurrency } from "@/actions/currency";
 import TransactionBarChart from "../_components/transaction-bar-chart";
 
 interface AccountPageProps {
@@ -15,14 +16,21 @@ interface AccountPageProps {
 
 export default async function AccountPage({ params }: AccountPageProps) {
   
-  const { id } = await params; 
-  const accountData = await getAccountWithTransactions(id);
+  const { id } = params; 
+  const [accountData, fx, userCurrency] = await Promise.all([
+    getAccountWithTransactions(id),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
 
   if (!accountData) {
     notFound();
   }
 
   const { transactions, ...account } = accountData;
+
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
 
   return (
     <div className="space-y-6 pb-8">
@@ -41,7 +49,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
 
         <div className="text-right pb-2">
           <div className="text-lg sm:text-xl font-bold">
-            NPR {formatIndianNumber(parseFloat(account.balance))}
+            {formatDisplayCurrency(parseFloat(account.balance), displayCurrency, nprPerUsd)}
           </div>
           <p className="text-xs text-muted-foreground">
             {account._count.transactions} Transactions

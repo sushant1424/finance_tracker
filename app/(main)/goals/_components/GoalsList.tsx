@@ -275,6 +275,7 @@ const GoalsList: React.FC<GoalsListProps> = ({ goals }) => {
                             size="icon"
                             variant="ghost"
                             className="h-7 w-7 p-0"
+                            aria-label="Open goal actions"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>

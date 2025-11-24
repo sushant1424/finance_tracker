@@ -1,9 +1,10 @@
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatIndianCurrency } from "@/lib/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import { getSpendingByCategory } from "@/actions/statistics";
 import { getAllUserTransactions } from "@/actions/transactions";
+import { getFxRates, getUserCurrency } from "@/actions/currency";
 import SpendingByCategoryChart from "./_components/spending-by-category-chart";
 
 interface ExpenseTransaction {
@@ -15,9 +16,17 @@ interface ExpenseTransaction {
 }
 
 const SpendingPage = async () => {
-  const { chartData, total, topCategory } = await getSpendingByCategory();
-  const allTransactions =
-    (await getAllUserTransactions()) as ExpenseTransaction[];
+  const [spendingData, allTransactions, fx, userCurrency] = await Promise.all([
+    getSpendingByCategory(),
+    getAllUserTransactions(),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
+
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
+
+  const { chartData, total, topCategory } = spendingData;
 
   const expenseTransactions = allTransactions.filter(
     (tx) => tx.type === "EXPENSE"
@@ -45,7 +54,7 @@ const SpendingPage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
-              {formatIndianCurrency(total)}
+              {formatDisplayCurrency(total, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -71,7 +80,11 @@ const SpendingPage = async () => {
         </Card>
       </div>
 
-      <SpendingByCategoryChart transactions={expenseTransactions} />
+      <SpendingByCategoryChart
+        transactions={expenseTransactions}
+        displayCurrency={displayCurrency}
+        nprPerUsd={nprPerUsd}
+      />
     </div>
   );
 };

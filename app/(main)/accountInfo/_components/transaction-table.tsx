@@ -49,7 +49,7 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
   };
 
   const handleSelectAll = () => {
-    setSelectedIds((current) => 
+    setSelectedIds((current) =>
       current.length === paginatedTransactions.length
         ? []
         : paginatedTransactions.map((transaction) => transaction.id)
@@ -259,6 +259,8 @@ const TransactionTable = ({ transactions }: { transactions: Transaction[] }) => 
                   isSelected={selectedIds.includes(transaction.id)}
                   onSelect={handleSelect}
                   onDelete={deleteFn}
+                  displayCurrency={"NPR"}
+                  nprPerUsd={1}
                 />
               ))
             )}

@@ -2,12 +2,10 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import Link from "next/link"
 import { Button } from "./ui/button"
 import { LayoutDashboard } from "lucide-react"
-import { checkUser } from "@/lib/checkUser"
 
 
-const Header = async () => {
+const Header = () => {
 
-  await checkUser();
   return (
     <div className = "fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <nav className="flex items-center justify-between container mx-auto px-2 py-4">

@@ -418,6 +418,7 @@ const BudgetClient = ({ overview }: BudgetClientProps) => {
                       size="icon"
                       variant="ghost"
                       onClick={() => remove(index)}
+                      aria-label="Remove category"
                     >
                       ×
                     </Button>

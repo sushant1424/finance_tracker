@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { categoryColors, defaultCategories } from '@/data/categories';
 import { format } from 'date-fns';
 import { Clock, RefreshCw, Trash, Pencil } from 'lucide-react';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayCurrency, type DisplayCurrency } from '@/lib/currency';
 import React, { useState } from 'react';
 import { Transaction, RECURRING_INTERVALS } from './types';
 import {
@@ -28,6 +28,8 @@ interface TransactionRowProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDelete: (ids: string[]) => void;
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 export const TransactionRow: React.FC<TransactionRowProps> = ({
@@ -35,6 +37,8 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   isSelected,
   onSelect,
   onDelete,
+  displayCurrency,
+  nprPerUsd,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -72,7 +76,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
           transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
         }`}
       >
-        {transaction.type === "EXPENSE" ? "-" : "+"}NPR {formatIndianNumber(transaction.amount)}
+        {formatDisplayCurrency(transaction.amount, displayCurrency, nprPerUsd)}
       </TableCell>
 
       <TableCell>

@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Download } from "lucide-react";
-import { formatIndianNumber } from "@/lib/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 
 interface CashflowPoint {
   month: string;
@@ -23,9 +23,15 @@ interface CashflowPoint {
 
 interface BestMonthsReportProps {
   data: CashflowPoint[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
-const BestMonthsReport: React.FC<BestMonthsReportProps> = ({ data }) => {
+const BestMonthsReport: React.FC<BestMonthsReportProps> = ({
+  data,
+  displayCurrency,
+  nprPerUsd,
+}) => {
   const hasData = data.length > 0;
 
   const handleExportCSV = () => {
@@ -105,13 +111,13 @@ const BestMonthsReport: React.FC<BestMonthsReportProps> = ({ data }) => {
                 <TableRow key={row.month}>
                   <TableCell className="font-medium">{row.month}</TableCell>
                   <TableCell className="text-right">
-                    NPR {formatIndianNumber(row.income)}
+                    {formatDisplayCurrency(row.income, displayCurrency, nprPerUsd)}
                   </TableCell>
                   <TableCell className="text-right">
-                    NPR {formatIndianNumber(row.expense)}
+                    {formatDisplayCurrency(row.expense, displayCurrency, nprPerUsd)}
                   </TableCell>
                   <TableCell className="text-right font-semibold text-green-600">
-                    +NPR {formatIndianNumber(row.net)}
+                    +{formatDisplayCurrency(row.net, displayCurrency, nprPerUsd)}
                   </TableCell>
                 </TableRow>
               ))}

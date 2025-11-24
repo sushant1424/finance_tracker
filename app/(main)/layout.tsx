@@ -1,33 +1,17 @@
-"use client";
+"use server";
 
-import DashboardShell from '@/components/dashboard/DashboardShell';
-import { AnimatePresence, motion } from 'motion/react';
-import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { ReactNode } from 'react';
+import { checkUser } from '@/lib/checkUser';
+import MainLayoutClient from './MainLayoutClient';
 
 interface MainLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const MainLayout = ({children}: MainLayoutProps) => {
-  const pathname = usePathname();
+const MainLayout = async ({ children }: MainLayoutProps) => {
+  await checkUser();
 
-  return (
-    <DashboardShell>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={pathname}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="min-h-full"
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
-    </DashboardShell>
-  )
-}
+  return <MainLayoutClient>{children}</MainLayoutClient>;
+};
 
-export default MainLayout
+export default MainLayout;

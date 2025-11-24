@@ -2,11 +2,20 @@ import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getReportsData } from "@/actions/reports";
-import { formatIndianCurrency } from "@/lib/currency";
+import { getFxRates, getUserCurrency } from "@/actions/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
 import CashflowLineChart from "@/app/(main)/reports/_components/cashflow-line-chart";
 
 const AdvicePage = async () => {
-  const { chartData, totalIncome, totalExpense, net } = await getReportsData();
+  const [reports, fx, userCurrency] = await Promise.all([
+    getReportsData(),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
+
+  const { chartData, totalIncome, totalExpense, net } = reports;
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
 
   const months = chartData.length || 1;
   const avgNet = net / months;
@@ -75,7 +84,7 @@ const AdvicePage = async () => {
                 avgNet >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              {formatIndianCurrency(avgNet)} / month
+              {formatDisplayCurrency(avgNet, displayCurrency, nprPerUsd)} / month
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Positive net means you are living below your means.
@@ -89,23 +98,27 @@ const AdvicePage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              Income: <span className="font-medium">{formatIndianCurrency(totalIncome)}</span>
+              Income: <span className="font-medium">{formatDisplayCurrency(totalIncome, displayCurrency, nprPerUsd)}</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              Expenses: <span className="font-medium">{formatIndianCurrency(totalExpense)}</span>
+              Expenses: <span className="font-medium">{formatDisplayCurrency(totalExpense, displayCurrency, nprPerUsd)}</span>
             </p>
             <p
               className={`mt-1 text-xs font-medium ${
                 net >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              Net: {formatIndianCurrency(net)}
+              Net: {formatDisplayCurrency(net, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <CashflowLineChart data={chartData} />
+      <CashflowLineChart
+        data={chartData}
+        displayCurrency={displayCurrency}
+        nprPerUsd={nprPerUsd}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
@@ -118,14 +131,14 @@ const AdvicePage = async () => {
             {bestMonth && (
               <div>
                 <span className="font-medium text-green-700">Your best month:</span>{" "}
-                {bestMonth.month} with a net of {formatIndianCurrency(bestMonth.net)}.
+                {bestMonth.month} with a net of {formatDisplayCurrency(bestMonth.net, displayCurrency, nprPerUsd)}.
               </div>
             )}
 
             {worstMonth && (
               <div>
                 <span className="font-medium text-red-700">Your toughest month:</span>{" "}
-                {worstMonth.month} with a net of {formatIndianCurrency(worstMonth.net)}.
+                {worstMonth.month} with a net of {formatDisplayCurrency(worstMonth.net, displayCurrency, nprPerUsd)}.
               </div>
             )}
 

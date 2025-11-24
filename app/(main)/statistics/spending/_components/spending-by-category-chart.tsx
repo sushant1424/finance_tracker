@@ -21,7 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatIndianNumber } from "@/lib/currency";
+import {
+  formatDisplayCurrency,
+  formatDisplayNumber,
+  getCurrencySymbol,
+  type DisplayCurrency,
+} from "@/lib/currency";
 import { endOfDay, startOfDay, subDays } from "date-fns";
 
 interface ExpenseTransaction {
@@ -40,6 +45,8 @@ interface CategoryPoint {
 
 interface SpendingByCategoryChartProps {
   transactions: ExpenseTransaction[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 const DATE_RANGES = {
@@ -63,7 +70,7 @@ const COLORS = [
   "#7c3aed",
 ];
 
-const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps) => {
+const SpendingByCategoryChart = ({ transactions, displayCurrency, nprPerUsd }: SpendingByCategoryChartProps) => {
   const [dateRange, setDateRange] = useState<DateRangeKey>("3M");
 
   const filteredTransactions = useMemo(() => {
@@ -153,7 +160,11 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
                     </Pie>
                     <Tooltip
                       formatter={(value: number) =>
-                        `NPR ${formatIndianNumber(value as number)}`
+                        formatDisplayCurrency(
+                          value as number,
+                          displayCurrency,
+                          nprPerUsd
+                        )
                       }
                       contentStyle={{
                         backgroundColor: "hsl(var(--popover))",
@@ -196,9 +207,14 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => {
-                      const formatted = formatIndianNumber(value as number);
+                      const formatted = formatDisplayNumber(
+                        value as number,
+                        displayCurrency,
+                        nprPerUsd
+                      );
                       const integerPart = formatted.split(".")[0];
-                      return `Rs ${integerPart}`;
+                      const symbol = getCurrencySymbol(displayCurrency);
+                      return `${symbol} ${integerPart}`;
                     }}
                   />
                   <YAxis
@@ -209,7 +225,11 @@ const SpendingByCategoryChart = ({ transactions }: SpendingByCategoryChartProps)
                   />
                   <Tooltip
                     formatter={(value: number) =>
-                      `NPR ${formatIndianNumber(value as number)}`
+                      formatDisplayCurrency(
+                        value as number,
+                        displayCurrency,
+                        nprPerUsd
+                      )
                     }
                     contentStyle={{
                       backgroundColor: "hsl(var(--popover))",

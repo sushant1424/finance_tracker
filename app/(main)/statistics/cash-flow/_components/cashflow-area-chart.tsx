@@ -19,7 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatIndianNumber } from "@/lib/currency";
+import {
+  formatDisplayCurrency,
+  formatDisplayNumber,
+  getCurrencySymbol,
+  type DisplayCurrency,
+} from "@/lib/currency";
 
 interface CashflowPoint {
   month: string;
@@ -30,6 +35,8 @@ interface CashflowPoint {
 
 interface CashflowAreaChartProps {
   data: CashflowPoint[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 const DATE_RANGES = {
@@ -40,7 +47,7 @@ const DATE_RANGES = {
 
 type DateRangeKey = keyof typeof DATE_RANGES;
 
-const CashflowAreaChart = ({ data }: CashflowAreaChartProps) => {
+const CashflowAreaChart = ({ data, displayCurrency, nprPerUsd }: CashflowAreaChartProps) => {
   const [dateRange, setDateRange] = useState<DateRangeKey>("6M");
 
   const filteredData = useMemo(() => {
@@ -103,13 +110,24 @@ const CashflowAreaChart = ({ data }: CashflowAreaChartProps) => {
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => {
-                  const formatted = formatIndianNumber(value as number);
+                  const formatted = formatDisplayNumber(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  );
                   const integerPart = formatted.split(".")[0];
-                  return `Rs ${integerPart}`;
+                  const symbol = getCurrencySymbol(displayCurrency);
+                  return `${symbol} ${integerPart}`;
                 }}
               />
               <Tooltip
-                formatter={(value: number) => `NPR ${formatIndianNumber(value as number)}`}
+                formatter={(value: number) =>
+                  formatDisplayCurrency(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  )
+                }
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",

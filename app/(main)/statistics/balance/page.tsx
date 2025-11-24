@@ -5,7 +5,8 @@ import { getUserAccounts } from "@/actions/accounts";
 import { getAllUserTransactions } from "@/actions/transactions";
 import BalanceDistributionChart from "./_components/balance-distribution-chart";
 import BalanceTrendChart from "./_components/balance-trend-chart";
-import { formatIndianCurrency } from "@/lib/currency";
+import { formatDisplayCurrency, type DisplayCurrency } from "@/lib/currency";
+import { getFxRates, getUserCurrency } from "@/actions/currency";
 import { format } from "date-fns";
 
 interface UserAccount {
@@ -24,8 +25,15 @@ interface UserTransaction {
 }
 
 const BalancePage = async () => {
-  const accounts = (await getUserAccounts()) as UserAccount[];
-  const transactions = (await getAllUserTransactions()) as UserTransaction[];
+  const [accounts, transactions, fx, userCurrency] = await Promise.all([
+    getUserAccounts(),
+    getAllUserTransactions(),
+    getFxRates(),
+    getUserCurrency(),
+  ]);
+
+  const displayCurrency = userCurrency as DisplayCurrency;
+  const nprPerUsd = fx.nprPerUsd;
 
   const totalBalance = accounts.reduce(
     (sum, acc) => sum + Number(acc.balance ?? 0),
@@ -105,7 +113,7 @@ const BalancePage = async () => {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
-              {formatIndianCurrency(totalBalance)}
+              {formatDisplayCurrency(totalBalance, displayCurrency, nprPerUsd)}
             </p>
           </CardContent>
         </Card>
@@ -132,7 +140,11 @@ const BalancePage = async () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <BalanceTrendChart data={balanceTimeline} />
+        <BalanceTrendChart
+          data={balanceTimeline}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
+        />
         <BalanceDistributionChart
           accounts={accounts.map((acc) => ({
             id: acc.id,
@@ -140,6 +152,8 @@ const BalancePage = async () => {
             type: acc.type,
             balance: Number(acc.balance ?? 0),
           }))}
+          displayCurrency={displayCurrency}
+          nprPerUsd={nprPerUsd}
         />
       </div>
     </div>

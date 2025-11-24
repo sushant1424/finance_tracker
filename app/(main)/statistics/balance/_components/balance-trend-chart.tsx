@@ -19,7 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatIndianNumber } from "@/lib/currency";
+import {
+  formatDisplayCurrency,
+  formatDisplayNumber,
+  getCurrencySymbol,
+  type DisplayCurrency,
+} from "@/lib/currency";
 import { endOfDay, startOfDay, subDays } from "date-fns";
 
 const DATE_RANGES = {
@@ -40,9 +45,11 @@ interface BalancePoint {
 
 interface BalanceTrendChartProps {
   data: BalancePoint[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
-const BalanceTrendChart = ({ data }: BalanceTrendChartProps) => {
+const BalanceTrendChart = ({ data, displayCurrency, nprPerUsd }: BalanceTrendChartProps) => {
   const [dateRange, setDateRange] = useState<DateRangeKey>("3M");
 
   const filteredData = useMemo(() => {
@@ -108,14 +115,23 @@ const BalanceTrendChart = ({ data }: BalanceTrendChartProps) => {
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => {
-                  const formatted = formatIndianNumber(value as number);
+                  const formatted = formatDisplayNumber(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  );
                   const integerPart = formatted.split(".")[0];
-                  return `Rs ${integerPart}`;
+                  const symbol = getCurrencySymbol(displayCurrency);
+                  return `${symbol} ${integerPart}`;
                 }}
               />
               <Tooltip
                 formatter={(value: number) =>
-                  `NPR ${formatIndianNumber(value as number)}`
+                  formatDisplayCurrency(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  )
                 }
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",

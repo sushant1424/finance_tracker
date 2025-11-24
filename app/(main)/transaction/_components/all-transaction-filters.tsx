@@ -102,6 +102,7 @@ export const AllTransactionFilters: React.FC<AllTransactionFiltersProps> = ({
               size="icon"
               onClick={onClearFilters}
               title="Clear filters"
+              aria-label="Clear filters"
             >
               <X className="h-4 w-5" />
             </Button>

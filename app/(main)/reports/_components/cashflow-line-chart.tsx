@@ -11,7 +11,12 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { formatIndianNumber } from "@/lib/currency";
+import {
+  formatDisplayCurrency,
+  formatDisplayNumber,
+  getCurrencySymbol,
+  type DisplayCurrency,
+} from "@/lib/currency";
 
 interface CashflowPoint {
   month: string;
@@ -22,9 +27,11 @@ interface CashflowPoint {
 
 interface CashflowLineChartProps {
   data: CashflowPoint[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
-const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
+const CashflowLineChart = ({ data, displayCurrency, nprPerUsd }: CashflowLineChartProps) => {
   const hasData = data.some(
     (point) => point.income !== 0 || point.expense !== 0 || point.net !== 0
   );
@@ -59,14 +66,23 @@ const CashflowLineChart = ({ data }: CashflowLineChartProps) => {
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => {
-                  const formatted = formatIndianNumber(value as number);
+                  const formatted = formatDisplayNumber(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  );
                   const integerPart = formatted.split(".")[0];
-                  return `Rs ${integerPart}`;
+                  const symbol = getCurrencySymbol(displayCurrency);
+                  return `${symbol} ${integerPart}`;
                 }}
               />
               <Tooltip
                 formatter={(value: number) =>
-                  `NPR ${formatIndianNumber(value as number)}`
+                  formatDisplayCurrency(
+                    value as number,
+                    displayCurrency,
+                    nprPerUsd
+                  )
                 }
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",

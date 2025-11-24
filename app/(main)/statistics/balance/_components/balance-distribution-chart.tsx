@@ -9,7 +9,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { formatIndianNumber } from "@/lib/currency";
+import {
+  formatDisplayCurrency,
+  type DisplayCurrency,
+} from "@/lib/currency";
 
 interface BalanceAccountPoint {
   id: string;
@@ -20,11 +23,13 @@ interface BalanceAccountPoint {
 
 interface BalanceDistributionChartProps {
   accounts: BalanceAccountPoint[];
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 }
 
 const COLORS = ["#6366f1", "#22c55e", "#f97316", "#e11d48", "#0ea5e9", "#a855f7"];
 
-const BalanceDistributionChart = ({ accounts }: BalanceDistributionChartProps) => {
+const BalanceDistributionChart = ({ accounts, displayCurrency, nprPerUsd }: BalanceDistributionChartProps) => {
   const hasData = accounts.length > 0;
 
   const data = accounts.map((acc) => ({
@@ -62,7 +67,9 @@ const BalanceDistributionChart = ({ accounts }: BalanceDistributionChartProps) =
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `NPR ${formatIndianNumber(value)}`}
+                formatter={(value: number) =>
+                  formatDisplayCurrency(value as number, displayCurrency, nprPerUsd)
+                }
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",
