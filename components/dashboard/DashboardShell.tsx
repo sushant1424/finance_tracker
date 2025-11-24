@@ -26,7 +26,6 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
     { label: "Budget", href: "/budget", icon: <PiggyBank className="h-5 w-5 shrink-0" /> },
     { label: "Recurring", href: "/recurring", icon: <Repeat className="h-5 w-5 shrink-0" /> },
     { label: "Goals", href: "/goals", icon: <Target className="h-5 w-5 shrink-0" /> },
-    { label: "Investments", href: "/investments", icon: <LineChart className="h-5 w-5 shrink-0" /> },
     { label: "Advice", href: "/advice", icon: <MessageSquare className="h-5 w-5 shrink-0" /> },
     { label: "Currency", href: "/currency", icon: <CircleDollarSign className="h-5 w-5 shrink-0" /> },
   ], []);
