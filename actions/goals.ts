@@ -12,6 +12,15 @@ const serializeGoal = (obj: any): any => {
   if (obj.currentAmount) {
     serialized.currentAmount = obj.currentAmount.toNumber();
   }
+  if (obj.minTargetAmount !== undefined && obj.minTargetAmount !== null) {
+    serialized.minTargetAmount = obj.minTargetAmount.toNumber();
+  }
+  if (obj.maxTargetAmount !== undefined && obj.maxTargetAmount !== null) {
+    serialized.maxTargetAmount = obj.maxTargetAmount.toNumber();
+  }
+  if (obj.priority) {
+    serialized.priority = obj.priority;
+  }
   return serialized;
 };
 
@@ -21,9 +30,13 @@ interface GoalPayload {
   targetAmount: string | number;
   currentAmount?: string | number;
   dueDate?: string; // ISO string from input
+  minTargetAmount?: string | number;
+  maxTargetAmount?: string | number;
+  priority?: GoalPriorityType;
 }
 
 type GoalStatusType = "ACTIVE" | "COMPLETED" | "ARCHIVED";
+type GoalPriorityType = "LOW" | "MEDIUM" | "HIGH";
 
 export interface GoalDTO {
   id: string;
@@ -33,6 +46,9 @@ export interface GoalDTO {
   currentAmount: number;
   dueDate?: string | Date | null;
   status: GoalStatusType;
+   minTargetAmount?: number | null;
+   maxTargetAmount?: number | null;
+   priority: GoalPriorityType;
   userId: string;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -41,6 +57,16 @@ export interface GoalDTO {
 export interface CreateGoalResult {
   success: boolean;
   data: GoalDTO;
+}
+
+export type UpdateGoalResult = CreateGoalResult;
+
+export interface DeleteGoalResult {
+  success: boolean;
+}
+
+interface UpdateGoalPayload extends GoalPayload {
+  id: string;
 }
 
 const getUserGoalsCached = unstable_cache(
@@ -53,7 +79,11 @@ const getUserGoalsCached = unstable_cache(
 
     const goals = await db.goal.findMany({
       where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { status: "asc" },
+        { dueDate: "asc" },
+        { createdAt: "desc" },
+      ],
     });
 
     return goals.map(serializeGoal) as GoalDTO[];
@@ -100,6 +130,28 @@ export async function createGoal(data: GoalPayload): Promise<CreateGoalResult> {
       throw new Error("Invalid current amount");
     }
 
+    const minTargetFloat = data.minTargetAmount
+      ? parseFloat(data.minTargetAmount.toString())
+      : null;
+    if (minTargetFloat !== null && (isNaN(minTargetFloat) || minTargetFloat <= 0)) {
+      throw new Error("Invalid minimum target amount");
+    }
+
+    const maxTargetFloat = data.maxTargetAmount
+      ? parseFloat(data.maxTargetAmount.toString())
+      : null;
+    if (maxTargetFloat !== null && (isNaN(maxTargetFloat) || maxTargetFloat <= 0)) {
+      throw new Error("Invalid maximum target amount");
+    }
+
+    if (
+      minTargetFloat !== null &&
+      maxTargetFloat !== null &&
+      minTargetFloat > maxTargetFloat
+    ) {
+      throw new Error("Minimum amount cannot be greater than maximum amount");
+    }
+
     const dueDate = data.dueDate ? new Date(data.dueDate) : null;
 
     const goal = await db.goal.create({
@@ -110,11 +162,98 @@ export async function createGoal(data: GoalPayload): Promise<CreateGoalResult> {
         currentAmount: currentFloat,
         dueDate,
         status: "ACTIVE",
+        minTargetAmount: minTargetFloat,
+        maxTargetAmount: maxTargetFloat,
+        priority: (data.priority as any) || "MEDIUM",
         userId: user.id,
       },
     });
 
     const serialized = serializeGoal(goal) as GoalDTO;
+
+    revalidatePath("/goals");
+    revalidateTag("goals");
+    revalidateTag("dashboard");
+
+    return { success: true, data: serialized };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateGoal(data: UpdateGoalPayload): Promise<UpdateGoalResult> {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    const existing = await db.goal.findFirst({
+      where: {
+        id: data.id,
+        userId: user.id,
+      },
+    });
+
+    if (!existing) throw new Error("Goal not found");
+
+    const targetFloat = parseFloat(data.targetAmount.toString());
+    if (isNaN(targetFloat) || targetFloat <= 0) {
+      throw new Error("Invalid target amount");
+    }
+
+    const currentFloat = data.currentAmount
+      ? parseFloat(data.currentAmount.toString())
+      : 0;
+    if (isNaN(currentFloat) || currentFloat < 0) {
+      throw new Error("Invalid current amount");
+    }
+
+    const minTargetFloat = data.minTargetAmount
+      ? parseFloat(data.minTargetAmount.toString())
+      : null;
+    if (minTargetFloat !== null && (isNaN(minTargetFloat) || minTargetFloat <= 0)) {
+      throw new Error("Invalid minimum target amount");
+    }
+
+    const maxTargetFloat = data.maxTargetAmount
+      ? parseFloat(data.maxTargetAmount.toString())
+      : null;
+    if (maxTargetFloat !== null && (isNaN(maxTargetFloat) || maxTargetFloat <= 0)) {
+      throw new Error("Invalid maximum target amount");
+    }
+
+    if (
+      minTargetFloat !== null &&
+      maxTargetFloat !== null &&
+      minTargetFloat > maxTargetFloat
+    ) {
+      throw new Error("Minimum amount cannot be greater than maximum amount");
+    }
+
+    const dueDate = data.dueDate ? new Date(data.dueDate) : null;
+
+    const updated = await db.goal.update({
+      where: { id: data.id },
+      data: {
+        title: data.title,
+        description: data.description || null,
+        targetAmount: targetFloat,
+        currentAmount: currentFloat,
+        dueDate,
+        // Keep existing status; status changes are handled explicitly via updateGoalStatus/updateGoalProgress
+        status: existing.status,
+        minTargetAmount: minTargetFloat,
+        maxTargetAmount: maxTargetFloat,
+        priority: (data.priority as any) || existing.priority,
+      },
+    });
+
+    const serialized = serializeGoal(updated) as GoalDTO;
 
     revalidatePath("/goals");
     revalidateTag("goals");
@@ -168,6 +307,40 @@ export async function updateGoalProgress(goalId: string, currentAmount: number) 
     revalidateTag("dashboard");
 
     return { success: true, data: serialized };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteGoal(goalId: string): Promise<DeleteGoalResult> {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) throw new Error("User not found");
+
+    const existing = await db.goal.findFirst({
+      where: {
+        id: goalId,
+        userId: user.id,
+      },
+    });
+
+    if (!existing) throw new Error("Goal not found");
+
+    await db.goal.delete({
+      where: { id: goalId },
+    });
+
+    revalidatePath("/goals");
+    revalidateTag("goals");
+    revalidateTag("dashboard");
+
+    return { success: true };
   } catch (error: any) {
     throw new Error(error.message);
   }

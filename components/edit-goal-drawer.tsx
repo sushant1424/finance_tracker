@@ -15,7 +15,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { goalSchema } from "@/app/(main)/lib/schema";
 import useFetch from "@/hooks/use-fetch";
-import { createGoal, type CreateGoalResult } from "@/actions/goals";
+import { updateGoal, type UpdateGoalResult, type GoalDTO } from "@/actions/goals";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { z } from "zod";
@@ -23,13 +23,21 @@ import { useRouter } from "next/navigation";
 
 type GoalFormValues = z.input<typeof goalSchema>;
 
-interface CreateGoalDrawerProps {
+interface EditGoalDrawerProps {
+  goal: GoalDTO;
   children: React.ReactNode;
 }
 
-const CreateGoalDrawer = ({ children }: CreateGoalDrawerProps) => {
+const EditGoalDrawer = ({ goal, children }: EditGoalDrawerProps) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  const dueDateValue =
+    goal.dueDate instanceof Date
+      ? goal.dueDate.toISOString().split("T")[0]
+      : goal.dueDate
+      ? new Date(goal.dueDate).toISOString().split("T")[0]
+      : "";
 
   const {
     register,
@@ -39,26 +47,33 @@ const CreateGoalDrawer = ({ children }: CreateGoalDrawerProps) => {
   } = useForm<GoalFormValues>({
     resolver: zodResolver(goalSchema),
     defaultValues: {
-      title: "",
-      targetAmount: "",
-      currentAmount: "",
-      dueDate: "",
-      description: "",
-      minTargetAmount: "",
-      maxTargetAmount: "",
-      priority: "MEDIUM",
+      title: goal.title || "",
+      targetAmount: goal.targetAmount?.toString() || "",
+      currentAmount: goal.currentAmount?.toString() || "",
+      dueDate: dueDateValue,
+      description: goal.description || "",
+      minTargetAmount:
+        goal.minTargetAmount !== undefined && goal.minTargetAmount !== null
+          ? goal.minTargetAmount.toString()
+          : "",
+      maxTargetAmount:
+        goal.maxTargetAmount !== undefined && goal.maxTargetAmount !== null
+          ? goal.maxTargetAmount.toString()
+          : "",
+      priority: goal.priority || "MEDIUM",
     },
   });
 
   const {
-    data: newGoal,
-    loading: createGoalLoading,
+    data: updatedGoal,
+    loading: updateGoalLoading,
     error,
-    fn: createGoalFn,
-  } = useFetch<CreateGoalResult>(createGoal);
+    fn: updateGoalFn,
+  } = useFetch<UpdateGoalResult>(updateGoal);
 
   const onSubmit = async (values: GoalFormValues) => {
-    await createGoalFn({
+    await updateGoalFn({
+      id: goal.id,
       title: values.title,
       description: values.description,
       targetAmount: values.targetAmount,
@@ -80,20 +95,39 @@ const CreateGoalDrawer = ({ children }: CreateGoalDrawerProps) => {
   };
 
   useEffect(() => {
-    if (newGoal?.success) {
-      toast.success("Goal created successfully");
-      reset();
+    if (updatedGoal?.success) {
+      toast.success("Goal updated successfully");
+      const updated = updatedGoal.data;
+      const updatedDueDate = updated.dueDate
+        ? new Date(updated.dueDate).toISOString().split("T")[0]
+        : "";
+      reset({
+        title: updated.title || "",
+        targetAmount: updated.targetAmount?.toString() || "",
+        currentAmount: updated.currentAmount?.toString() || "",
+        dueDate: updatedDueDate,
+        description: updated.description || "",
+        minTargetAmount:
+          updated.minTargetAmount !== undefined && updated.minTargetAmount !== null
+            ? updated.minTargetAmount.toString()
+            : "",
+        maxTargetAmount:
+          updated.maxTargetAmount !== undefined && updated.maxTargetAmount !== null
+            ? updated.maxTargetAmount.toString()
+            : "",
+        priority: updated.priority || "MEDIUM",
+      });
       setOpen(false);
       router.refresh();
     }
-  }, [newGoal, reset, router]);
+  }, [updatedGoal, reset, router]);
 
   useEffect(() => {
     if (error) {
       toast.error(
         (error as { message?: string })?.message ||
           String(error) ||
-          "Failed to create goal"
+          "Failed to update goal"
       );
     }
   }, [error]);
@@ -104,7 +138,7 @@ const CreateGoalDrawer = ({ children }: CreateGoalDrawerProps) => {
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Create Goal</DrawerTitle>
+            <DrawerTitle>Edit Goal</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-4">
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -269,15 +303,15 @@ const CreateGoalDrawer = ({ children }: CreateGoalDrawerProps) => {
                 <Button
                   type="submit"
                   className="flex-1"
-                  disabled={!!createGoalLoading}
+                  disabled={!!updateGoalLoading}
                 >
-                  {createGoalLoading ? (
+                  {updateGoalLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
+                      Saving...
                     </>
                   ) : (
-                    "Create Goal"
+                    "Save Changes"
                   )}
                 </Button>
               </div>
@@ -289,4 +323,4 @@ const CreateGoalDrawer = ({ children }: CreateGoalDrawerProps) => {
   );
 };
 
-export default CreateGoalDrawer;
+export default EditGoalDrawer;

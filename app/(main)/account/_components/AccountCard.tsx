@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import useFetch from '@/hooks/use-fetch';
 import { ArrowDownRight, ArrowUpRight, Trash2} from 'lucide-react';
 import Link from 'next/link';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner';
-import { useEffect } from 'react';
-import { formatIndianNumber } from '@/lib/currency';
+import { formatDisplayNumber, getCurrencySymbol, type DisplayCurrency } from '@/lib/currency';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,11 +29,15 @@ type AccountCardProps = {
     balance: number;
     isDefault: boolean;
   };
+  displayCurrency: DisplayCurrency;
+  nprPerUsd: number;
 };
 
-const AccountCard = ({ account }: AccountCardProps) => {
+const AccountCard = ({ account, displayCurrency, nprPerUsd }: AccountCardProps) => {
     const { name, type, balance, id, isDefault } = account;
+
     const router = useRouter();
+
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
     const {data:updatedAccount,
@@ -62,7 +66,6 @@ const AccountCard = ({ account }: AccountCardProps) => {
             toast.success("Default account updated successfully");
         }
      }, [updatedAccount]);
-
 
     useEffect(() => {
         if (error) {
@@ -97,6 +100,9 @@ const AccountCard = ({ account }: AccountCardProps) => {
         }
     }, [deleteError]);
 
+    const symbol = getCurrencySymbol(displayCurrency);
+    const formattedBalance = formatDisplayNumber(balance, displayCurrency, nprPerUsd);
+
     return (
         <div>
         <Card className="hover:shadow-md transition-shadow group relative">
@@ -108,9 +114,8 @@ const AccountCard = ({ account }: AccountCardProps) => {
                 </div>
             </CardHeader>
             <CardContent>
-                
                 <div className="text-2xl font-bold">
-                    NPR {formatIndianNumber(balance)}
+                    {symbol} {formattedBalance}
                 </div>
                 <p className="text-xs text-muted-foreground">
                     {type.charAt(0)+ type.slice(1).toLowerCase()} Account

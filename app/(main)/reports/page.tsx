@@ -5,6 +5,7 @@ import { formatIndianCurrency } from "@/lib/currency";
 import MonthlyOverviewReport from "./_components/reports-export-table";
 import LossMonthsReport from "./_components/loss-months-report";
 import BestMonthsReport from "./_components/best-months-report";
+import CashflowLineChart from "./_components/cashflow-line-chart";
 
 import { getReportsData } from "@/actions/reports";
 
@@ -94,11 +95,13 @@ const ReportsPage = async () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <CashflowLineChart data={chartData} />
         <MonthlyOverviewReport data={chartData} />
-        <div className="space-y-4">
-          <LossMonthsReport data={lossMonths} />
-          <BestMonthsReport data={bestMonths} />
-        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <LossMonthsReport data={lossMonths} />
+        <BestMonthsReport data={bestMonths} />
       </div>
     </div>
   );

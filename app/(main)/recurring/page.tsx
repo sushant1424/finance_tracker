@@ -5,6 +5,7 @@ import { Plus, Calendar, Repeat, DollarSign, TrendingUp, TrendingDown } from "lu
 import { getAllUserTransactions } from "@/actions/transactions";
 import CreateTransactionDrawer from "@/components/create-transaction-drawer";
 import { formatIndianCurrency, formatIndianNumber } from "@/lib/currency";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 // Define proper types
 interface Transaction {
@@ -42,6 +43,25 @@ export default async function RecurringPage() {
 
   const netMonthly = monthlyIncome - monthlyExpenses;
 
+  const now = new Date();
+  const tenDaysAhead = new Date();
+  tenDaysAhead.setDate(now.getDate() + 10);
+
+  const upcomingWindow = recurringData.filter((r) => {
+    const nextDate = r.nextRecurringDate ? new Date(r.nextRecurringDate) : new Date(r.date);
+    return nextDate >= now && nextDate <= tenDaysAhead;
+  });
+
+  const upcomingIncome = upcomingWindow
+    .filter((r) => r.type === "INCOME")
+    .reduce((sum, r) => sum + r.amount, 0);
+
+  const upcomingExpenses = upcomingWindow
+    .filter((r) => r.type === "EXPENSE")
+    .reduce((sum, r) => sum + r.amount, 0);
+
+  const upcomingNet = upcomingIncome - upcomingExpenses;
+
   const upcomingRecurring = recurringData
     .sort((a: Transaction, b: Transaction) => {
       const aDate = a.nextRecurringDate ? new Date(a.nextRecurringDate) : new Date(a.date);
@@ -51,11 +71,18 @@ export default async function RecurringPage() {
     .slice(0, 5);
 
   return (
-    <div className="px-8 py-6 min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
-          Recurring Transactions
-        </h1>
+    <div className="space-y-6 pb-8">
+      <Breadcrumb />
+
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight gradient-title">
+            Recurring
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Track and manage your recurring income and expenses.
+          </p>
+        </div>
         <CreateTransactionDrawer>
           <Button className="gap-2" size="sm">
             <Plus className="h-4 w-4" />
@@ -66,7 +93,7 @@ export default async function RecurringPage() {
 
       <div className="space-y-8">
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-green-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
@@ -111,6 +138,42 @@ export default async function RecurringPage() {
               <p className="text-xs text-gray-600 mt-1">
                 After recurring transactions
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-purple-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Next 10 days cashflow</CardTitle>
+              <Calendar className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm space-y-1">
+                <div className="flex items-center justify-between text-xs text-gray-700">
+                  <span>Incoming</span>
+                  <span className="font-medium text-emerald-600">
+                    {formatIndianCurrency(upcomingIncome)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-700">
+                  <span>Outgoing</span>
+                  <span className="font-medium text-red-600">
+                    {formatIndianCurrency(upcomingExpenses)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-700 mt-1">
+                  <span>Net</span>
+                  <span
+                    className={`font-semibold ${
+                      upcomingNet >= 0 ? "text-emerald-600" : "text-red-600"
+                    }`}
+                  >
+                    {formatIndianCurrency(upcomingNet)}
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-500 mt-1">
+                  Based on upcoming recurring items in the next 10 days.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

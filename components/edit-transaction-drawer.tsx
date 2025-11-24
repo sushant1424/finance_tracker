@@ -64,19 +64,6 @@ const EditTransactionDrawer = ({ transaction, children }: EditTransactionDrawerP
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedCategoryColor, setSelectedCategoryColor] = useState<string>("");
 
-  const initialValues: TransactionFormValues = {
-    type: transaction.type,
-    amount: transaction.amount.toString(),
-    description: transaction.description ?? "",
-    date: new Date(transaction.date).toISOString().split("T")[0],
-    category: transaction.category,
-    accountId: transaction.accountId,
-    isRecurring: Boolean(transaction.isRecurring),
-    recurringInterval: transaction.recurringInterval ?? undefined,
-    status: (transaction.status as TransactionFormValues["status"]) ?? "COMPLETED",
-    currency: "NPR",
-  };
-
   const {
     register,
     handleSubmit,
@@ -86,7 +73,18 @@ const EditTransactionDrawer = ({ transaction, children }: EditTransactionDrawerP
     reset,
   } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
-    defaultValues: initialValues,
+    defaultValues: {
+      type: transaction.type,
+      amount: transaction.amount.toString(),
+      description: transaction.description ?? "",
+      date: new Date(transaction.date).toISOString().split("T")[0],
+      category: transaction.category,
+      accountId: transaction.accountId,
+      isRecurring: Boolean(transaction.isRecurring),
+      recurringInterval: transaction.recurringInterval ?? undefined,
+      status: (transaction.status as TransactionFormValues["status"]) ?? "COMPLETED",
+      currency: "NPR",
+    },
   });
 
   const transactionType = watch("type");
@@ -105,8 +103,19 @@ const EditTransactionDrawer = ({ transaction, children }: EditTransactionDrawerP
   }, [selectedCategory]);
 
   useEffect(() => {
-    reset(initialValues);
-  }, [transaction.id, reset]);
+    reset({
+      type: transaction.type,
+      amount: transaction.amount.toString(),
+      description: transaction.description ?? "",
+      date: new Date(transaction.date).toISOString().split("T")[0],
+      category: transaction.category,
+      accountId: transaction.accountId,
+      isRecurring: Boolean(transaction.isRecurring),
+      recurringInterval: transaction.recurringInterval ?? undefined,
+      status: (transaction.status as TransactionFormValues["status"]) ?? "COMPLETED",
+      currency: "NPR",
+    });
+  }, [transaction, reset]);
 
   useEffect(() => {
     const fetchAccounts = async () => {

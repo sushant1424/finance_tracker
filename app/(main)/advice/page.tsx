@@ -3,6 +3,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getReportsData } from "@/actions/reports";
 import { formatIndianCurrency } from "@/lib/currency";
+import CashflowLineChart from "@/app/(main)/reports/_components/cashflow-line-chart";
 
 const AdvicePage = async () => {
   const { chartData, totalIncome, totalExpense, net } = await getReportsData();
@@ -103,6 +104,8 @@ const AdvicePage = async () => {
           </CardContent>
         </Card>
       </div>
+
+      <CashflowLineChart data={chartData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>

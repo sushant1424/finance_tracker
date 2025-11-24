@@ -4,7 +4,7 @@ import { Sidebar, SidebarLink, useSidebar } from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, LineChart, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart, CircleDollarSign } from "lucide-react";
+import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart, CircleDollarSign } from "lucide-react";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {

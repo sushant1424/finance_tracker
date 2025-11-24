@@ -43,4 +43,19 @@ export const goalSchema = z.object({
     ),
   dueDate: z.string().optional(),
   description: z.string().optional(),
+  minTargetAmount: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) > 0),
+      "Minimum amount must be a positive number"
+    ),
+  maxTargetAmount: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) > 0),
+      "Maximum amount must be a positive number"
+    ),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH"]).default("MEDIUM"),
 });

@@ -276,6 +276,19 @@ export async function deleteAccount(accountId: string) {
 
     return { success: true };
   } catch (error: any) {
-    throw new Error(error.message);
+    console.error("Failed to delete account", error);
+    const rawMessage =
+      typeof error?.message === "string" ? error.message : "";
+    if (
+      rawMessage.includes("Invalid `prisma.") ||
+      rawMessage.includes("PrismaClientKnownRequestError")
+    ) {
+      throw new Error(
+        "Something went wrong while deleting the account. Please try again."
+      );
+    }
+    throw new Error(
+      rawMessage || "Failed to delete account. Please try again."
+    );
   }
 }

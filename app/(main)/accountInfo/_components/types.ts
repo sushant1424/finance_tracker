@@ -5,9 +5,11 @@ export interface Transaction {
   type: "INCOME" | "EXPENSE";
   category: string;
   amount: number;
+  accountId: string;
   isRecurring?: boolean;
   recurringInterval?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
   nextRecurringDate?: string; 
+  status?: "PENDING" | "COMPLETED" | "FAILED";
 }
 
 export interface SortConfig {
