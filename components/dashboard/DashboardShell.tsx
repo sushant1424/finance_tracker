@@ -75,7 +75,7 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
             <div onClick={onLinkClick}>
               <SidebarLink
                 link={{
-                  label: "Admin dashboard",
+                  label: "Dashboard",
                   href: "/admin",
                   exact: true,
                   icon: <ShieldCheck className="h-5 w-5 shrink-0" />,

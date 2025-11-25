@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finance Tracker
 
-## Getting Started
+Finance Tracker is a full‑stack personal finance app built with Next.js (App Router). It helps you track income and expenses, manage budgets, set goals, and view rich statistics. An admin panel lets you manage users, view app‑wide analytics, and configure the public landing page content via site settings.
 
-First, run the development server:
+## Features
+
+- **Dashboard & Accounts**
+  - Overview of balances, recent transactions, and key metrics.
+  - Manage accounts and recurring transactions.
+
+- **Transactions & Budgeting**
+  - Create, edit, and categorize transactions.
+  - Budgets, recurring items, and goals.
+
+- **Statistics & Reports**
+  - Balance, cash‑flow, and spending statistics under `/statistics/*`.
+  - Reports section with charts and insights.
+
+- **Admin Panel**
+  - `/admin` dashboard with global stats.
+  - **Users**: list users and inspect individual user details.
+  - **Admin analytics**: charts for user growth, activity, and usage.
+  - **Site settings**: configure landing page content (hero, features, pricing, footer) with live previews. Each subsection has its own page under `/admin/settings/*`.
+
+## Tech Stack
+
+- **Framework**: Next.js (App Router, React server components)
+- **Language**: TypeScript, React 18
+- **Auth**: Clerk
+- **Database**: PostgreSQL via Prisma
+- **Styling & UI**: Tailwind CSS, custom UI components, motion/animation
+
+---
+
+## Local Development
+
+### 1. Prerequisites
+
+- Node.js 18+ (LTS recommended)
+- pnpm (preferred) or npm/yarn
+- PostgreSQL database
+
+### 2. Install dependencies
 
 ```bash
-npm run dev
+pnpm install
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env` file in the project root. At minimum you’ll need:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+DATABASE_URL="postgresql://user:password@localhost:5432/finance_tracker"
 
-## Learn More
+CLERK_PUBLISHABLE_KEY="pk_..."
+CLERK_SECRET_KEY="sk_..."
 
-To learn more about Next.js, take a look at the following resources:
+# Optional: other Clerk/Next URLs depending on your setup
+# NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
+# NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Adjust values to match your local database and Clerk project.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Database setup
 
-## Deploy on Vercel
+Run Prisma migrations to create the schema (including `SiteSettings`, transactions, goals, etc.):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm prisma migrate dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Optionally seed demo data:
+
+```bash
+pnpm dev
+# then in another terminal you can hit the seed route if implemented, e.g.
+# curl http://localhost:3000/api/seed
+```
+
+### 5. Run the development server
+
+```bash
+pnpm dev
+```
+
+Open `http://localhost:3000` in your browser.
+
+- Main app pages: `/dashboard`, `/transaction`, `/accounts`, `/goals`, `/statistics/*`, etc.
+- Admin panel: `/admin` (requires an admin Clerk user – see your Clerk dashboard for role setup).
+- Site settings: `/admin/settings/general`, `/admin/settings/hero`, `/admin/settings/features`, `/admin/settings/pricing`, `/admin/settings/footer`.
+
+### 6. Build for production
+
+```bash
+pnpm build
+pnpm start
+```
+
+This runs `next build` with Turbopack and starts the optimized production server.
+
+---
+
+## Notes
+
+- The project was originally bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+- For general Next.js docs, see:
+  - [Next.js Documentation](https://nextjs.org/docs)
+  - [Learn Next.js](https://nextjs.org/learn)
+
