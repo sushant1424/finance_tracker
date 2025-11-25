@@ -4,7 +4,7 @@ import { Sidebar, SidebarLink, useSidebar } from "@/components/ui/sidebar";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart, CircleDollarSign } from "lucide-react";
+import { LayoutDashboard, ReceiptText, PiggyBank, Target, Wallet, BarChart3, Repeat, MessageSquare, Menu, X, LogOut, ChevronDown, TrendingUp, PieChart, CircleDollarSign, ShieldCheck, Users, Settings } from "lucide-react";
 import { UserButton, useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,16 +19,20 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
-  const links = useMemo(() => [
-    { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 shrink-0" /> },
-    { label: "Transactions", href: "/transaction", icon: <ReceiptText className="h-5 w-5 shrink-0" /> },
-    { label: "Accounts", href: "/account", icon: <Wallet className="h-5 w-5 shrink-0" /> },
-    { label: "Budget", href: "/budget", icon: <PiggyBank className="h-5 w-5 shrink-0" /> },
-    { label: "Recurring", href: "/recurring", icon: <Repeat className="h-5 w-5 shrink-0" /> },
-    { label: "Goals", href: "/goals", icon: <Target className="h-5 w-5 shrink-0" /> },
-    { label: "Advice", href: "/advice", icon: <MessageSquare className="h-5 w-5 shrink-0" /> },
-    { label: "Currency", href: "/currency", icon: <CircleDollarSign className="h-5 w-5 shrink-0" /> },
-  ], []);
+  const links = useMemo(
+    () => [
+      { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 shrink-0" /> },
+      { label: "Transactions", href: "/transaction", icon: <ReceiptText className="h-5 w-5 shrink-0" /> },
+      { label: "Accounts", href: "/account", icon: <Wallet className="h-5 w-5 shrink-0" /> },
+      { label: "Budget", href: "/budget", icon: <PiggyBank className="h-5 w-5 shrink-0" /> },
+      { label: "Recurring", href: "/recurring", icon: <Repeat className="h-5 w-5 shrink-0" /> },
+      { label: "Goals", href: "/goals", icon: <Target className="h-5 w-5 shrink-0" /> },
+      { label: "Advice", href: "/advice", icon: <MessageSquare className="h-5 w-5 shrink-0" /> },
+      { label: "Currency", href: "/currency", icon: <CircleDollarSign className="h-5 w-5 shrink-0" /> },
+      
+    ],
+    []
+  );
 
   const statisticsLinks = useMemo(() => [
     { label: "Balance", href: "/statistics/balance", icon: <Wallet className="h-4 w-4" /> },
@@ -47,7 +51,11 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
   const [statisticsOpen, setStatisticsOpen] = useState(() =>
     pathname.startsWith("/statistics") || pathname === "/reports"
   );
+  const [siteSettingsOpen, setSiteSettingsOpen] = useState(() =>
+    pathname.startsWith("/admin/settings")
+  );
   const showStatisticsLabel = isMobile || !animate || open;
+  const isAdminRoute = pathname.startsWith("/admin");
 
   const handleLogout = () => {
     setLogoutOpen(false);
@@ -62,61 +70,152 @@ const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () =>
         </Link>
       )}
       <div className={`${!isMobile ? 'mt-8' : ''} flex flex-col gap-2`}>
-        {links.slice(0, 6).map((link, idx) => (
-          <div key={idx} onClick={onLinkClick}>
-            <SidebarLink link={link} forceLabel={isMobile} />
-          </div>
-        ))}
-
-        <div className="mt-1">
-          <button
-            type="button"
-            onClick={() => setStatisticsOpen((prev) => !prev)}
-            className={`flex w-full items-center justify-between gap-2 group/sidebar py-2 rounded-xl transition-colors text-white/85 hover:text-white hover:bg-white/10 ${
-              !isMobile && open ? "pl-3 pr-2" : "px-2"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 shrink-0" />
-              <motion.span
-                animate={{
-                  display: showStatisticsLabel ? "inline-block" : "none",
-                  opacity: showStatisticsLabel ? 1 : 0,
+        {isAdminRoute ? (
+          <>
+            <div onClick={onLinkClick}>
+              <SidebarLink
+                link={{
+                  label: "Admin dashboard",
+                  href: "/admin",
+                  exact: true,
+                  icon: <ShieldCheck className="h-5 w-5 shrink-0" />,
                 }}
-                className="text-sm text-white group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+                forceLabel={isMobile}
+              />
+            </div>
+            <div onClick={onLinkClick}>
+              <SidebarLink
+                link={{
+                  label: "Users",
+                  href: "/admin/users",
+                  exact: true,
+                  icon: <Users className="h-5 w-5 shrink-0" />,
+                }}
+                forceLabel={isMobile}
+              />
+            </div>
+            <div onClick={onLinkClick}>
+              <SidebarLink
+                link={{
+                  label: "Analytics",
+                  href: "/admin/analytics",
+                  exact: true,
+                  icon: <BarChart3 className="h-5 w-5 shrink-0" />,
+                }}
+                forceLabel={isMobile}
+              />
+            </div>
+            <div className="mt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (onLinkClick) onLinkClick();
+                  setSiteSettingsOpen((prev) => !prev);
+                }}
+                className={`flex w-full items-center justify-between gap-2 group/sidebar py-2 rounded-xl transition-colors text-white/85 hover:text-white hover:bg-white/10 ${
+                  !isMobile && open ? "pl-3 pr-2" : "px-2"
+                }`}
               >
-                Statistics
-              </motion.span>
-            </div>
-            <ChevronDown
-              className={`ml-auto h-4 w-4 transition-transform ${statisticsOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-
-          {statisticsOpen && (
-            <div className="mt-1 space-y-1">
-              {statisticsLinks.map((link) => (
-                <div key={link.href} onClick={onLinkClick}>
-                  <SidebarLink
-                    link={{
-                      label: link.label,
-                      href: link.href,
-                      icon: link.icon,
+                <div className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 shrink-0" />
+                  <motion.span
+                    animate={{
+                      display: showStatisticsLabel ? "inline-block" : "none",
+                      opacity: showStatisticsLabel ? 1 : 0,
                     }}
-                    forceLabel={isMobile}
-                    className={open ? "pl-6" : "pl-2"}
-                  />
+                    className="text-sm text-white group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+                  >
+                    Site settings
+                  </motion.span>
                 </div>
-              ))}
+                <ChevronDown
+                  className={`ml-auto h-4 w-4 transition-transform ${siteSettingsOpen ? "rotate-180" : ""}`}
+                />
+              </button>
             </div>
-          )}
-        </div>
+            {siteSettingsOpen && (
+              <div className="mt-1 space-y-1">
+                {[
+                  { label: "General", href: "/admin/settings/general" },
+                  { label: "Hero", href: "/admin/settings/hero" },
+                  { label: "Features", href: "/admin/settings/features" },
+                  { label: "Pricing", href: "/admin/settings/pricing" },
+                  { label: "Footer", href: "/admin/settings/footer" },
+                ].map((item) => (
+                  <div key={item.label} onClick={onLinkClick}>
+                    <SidebarLink
+                      link={{
+                        label: item.label,
+                        href: item.href,
+                        icon: <Settings className="h-4 w-4" />,
+                      }}
+                      forceLabel={isMobile}
+                      className={open ? "pl-6" : "pl-2"}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {links.slice(0, 6).map((link, idx) => (
+              <div key={idx} onClick={onLinkClick}>
+                <SidebarLink link={link} forceLabel={isMobile} />
+              </div>
+            ))}
 
-        {links.slice(6).map((link, idx) => (
-          <div key={`secondary-${idx}`} onClick={onLinkClick}>
-            <SidebarLink link={link} forceLabel={isMobile} />
-          </div>
-        ))}
+            <div className="mt-1">
+              <button
+                type="button"
+                onClick={() => setStatisticsOpen((prev) => !prev)}
+                className={`flex w-full items-center justify-between gap-2 group/sidebar py-2 rounded-xl transition-colors text-white/85 hover:text-white hover:bg-white/10 ${
+                  !isMobile && open ? "pl-3 pr-2" : "px-2"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 shrink-0" />
+                  <motion.span
+                    animate={{
+                      display: showStatisticsLabel ? "inline-block" : "none",
+                      opacity: showStatisticsLabel ? 1 : 0,
+                    }}
+                    className="text-sm text-white group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+                  >
+                    Statistics
+                  </motion.span>
+                </div>
+                <ChevronDown
+                  className={`ml-auto h-4 w-4 transition-transform ${statisticsOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {statisticsOpen && (
+                <div className="mt-1 space-y-1">
+                  {statisticsLinks.map((link) => (
+                    <div key={link.href} onClick={onLinkClick}>
+                      <SidebarLink
+                        link={{
+                          label: link.label,
+                          href: link.href,
+                          icon: link.icon,
+                        }}
+                        forceLabel={isMobile}
+                        className={open ? "pl-6" : "pl-2"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {links.slice(6).map((link, idx) => (
+              <div key={`secondary-${idx}`} onClick={onLinkClick}>
+                <SidebarLink link={link} forceLabel={isMobile} />
+              </div>
+            ))}
+          </>
+        )}
       </div>
       <div className="mt-auto pt-6 space-y-3">
         <div className="flex items-center gap-2 py-2">

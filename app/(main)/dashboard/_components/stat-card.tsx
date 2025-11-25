@@ -1,7 +1,18 @@
 "use client"
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Wallet, TrendingUp, TrendingDown, CreditCard } from 'lucide-react';
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  CreditCard,
+  Users,
+  UserCheck,
+  Activity,
+  ReceiptText,
+  BarChart3,
+  Target,
+} from 'lucide-react';
 import React from 'react';
 import { motion } from 'motion/react';
 
@@ -10,6 +21,12 @@ const iconMap = {
   TrendingUp,
   TrendingDown,
   CreditCard,
+  Users,
+  UserCheck,
+  Activity,
+  ReceiptText,
+  BarChart3,
+  Target,
 };
 
 interface StatCardProps {

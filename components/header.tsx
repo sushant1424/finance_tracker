@@ -2,22 +2,34 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import Link from "next/link"
 import { Button } from "./ui/button"
 import { LayoutDashboard } from "lucide-react"
+import type { HeaderSettings } from "@/actions/site-settings"
 
+const FALLBACK_HEADER: HeaderSettings = {
+  brandName: "MoneyNest",
+  navLinks: [
+    { label: "Features", href: "#features" },
+    { label: "Pricing", href: "#pricing" },
+    { label: "FAQ", href: "#faq" },
+  ],
+}
 
-const Header = () => {
+const Header = ({ settings }: { settings?: HeaderSettings }) => {
+  const header = settings ?? FALLBACK_HEADER
 
   return (
     <div className = "fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <nav className="flex items-center justify-between container mx-auto px-2 py-4">
         <Link href="/">
-            <span className="text-[25px] font-semibold tracking-wide text-neutral-800">MoneyNest</span>
+            <span className="text-[25px] font-semibold tracking-wide text-neutral-800">{header.brandName}</span>
         </Link>
 
         {/* Center nav */}
         <div className="hidden md:flex items-center gap-8 text-sm text-gray-700">
-          <Link href="#features" className="hover:text-blue-600">Features</Link>
-          <Link href="#pricing" className="hover:text-blue-600">Pricing</Link>
-          <Link href="#faq" className="hover:text-blue-600">FAQ</Link>
+          {header.navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="hover:text-blue-600">
+              {link.label}
+            </Link>
+          ))}
         </div>
 
         <div className="flex items-center space-x-4">
