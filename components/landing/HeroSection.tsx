@@ -6,7 +6,7 @@ import { FlipWords } from "@/components/ui/flip-words"
 import type { HeroSettings } from "@/actions/site-settings"
 
 const FALLBACK_HERO: HeroSettings = {
-  eyebrow: "Welcome to Welth",
+  eyebrow: "Welcome to MoneyNest",
   titleWords: [
     { text: "Build smart financial" },
     { text: "habits with us.", highlight: true },
