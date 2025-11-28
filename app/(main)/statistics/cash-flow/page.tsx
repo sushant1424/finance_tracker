@@ -53,7 +53,7 @@ const CashflowPage = async () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Total income (6 months)</CardTitle>
+            <CardTitle className="text-sm font-semibold">Total income</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
@@ -64,7 +64,7 @@ const CashflowPage = async () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Total expenses (6 months)</CardTitle>
+            <CardTitle className="text-sm font-semibold">Total expenses</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">

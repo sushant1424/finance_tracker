@@ -24,17 +24,10 @@ const getSpendingByCategoryCached = unstable_cache(
 
     if (!user) throw new Error("User not found");
 
-    const now = new Date();
-    const since = subMonths(startOfMonth(now), 2); // last 3 months including current
-
     const transactions = await db.transaction.findMany({
       where: {
         userId: user.id,
         type: "EXPENSE",
-        date: {
-          gte: since,
-          lte: now,
-        },
       },
       orderBy: { date: "desc" },
     });

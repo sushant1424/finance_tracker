@@ -34,17 +34,9 @@ const getReportsDataCached = unstable_cache(
 
     if (!user) throw new Error("User not found");
 
-    const now = new Date();
-    const startRange = subMonths(startOfMonth(now), 5);
-    const endRange = endOfMonth(now);
-
     const transactions = await db.transaction.findMany({
       where: {
         userId: user.id,
-        date: {
-          gte: startRange,
-          lte: endRange,
-        },
       },
       orderBy: { date: "asc" },
     });

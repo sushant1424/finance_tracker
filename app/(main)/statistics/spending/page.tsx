@@ -48,7 +48,7 @@ const SpendingPage = async () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Total spending (last 3 months)</CardTitle>
+            <CardTitle className="text-sm font-semibold">Total spending</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">

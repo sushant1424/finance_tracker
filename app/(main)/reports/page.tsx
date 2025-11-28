@@ -80,7 +80,7 @@ const ReportsPage = async () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Total income (6 months)</CardTitle>
+            <CardTitle className="text-sm font-semibold">Total income</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
@@ -91,7 +91,7 @@ const ReportsPage = async () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Total expenses (6 months)</CardTitle>
+            <CardTitle className="text-sm font-semibold">Total expenses</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold">
@@ -102,7 +102,7 @@ const ReportsPage = async () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Net (6 months)</CardTitle>
+            <CardTitle className="text-sm font-semibold">Net</CardTitle>
           </CardHeader>
           <CardContent>
             <p

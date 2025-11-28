@@ -27,7 +27,7 @@ import {
   getCurrencySymbol,
   type DisplayCurrency,
 } from "@/lib/currency";
-import { endOfDay, startOfDay, subDays } from "date-fns";
+import { endOfDay, startOfDay, subDays, subMonths, startOfMonth } from "date-fns";
 
 interface ExpenseTransaction {
   id: string;
@@ -49,15 +49,21 @@ interface SpendingByCategoryChartProps {
   nprPerUsd: number;
 }
 
-const DATE_RANGES = {
+type DateRangeKey = "7D" | "1M" | "3M" | "6M" | "ALL";
+
+interface DateRangeConfig {
+  label: string;
+  days: number | null;
+  useMonthCalculation?: boolean;
+}
+
+const DATE_RANGES: Record<DateRangeKey, DateRangeConfig> = {
   "7D": { label: "Last 7 days", days: 7 },
   "1M": { label: "Last month", days: 30 },
-  "3M": { label: "Last 3 months", days: 90 },
+  "3M": { label: "Last 3 months", days: null, useMonthCalculation: true },
   "6M": { label: "Last 6 months", days: 180 },
-  ALL: { label: "All time", days: null as number | null },
+  ALL: { label: "All time", days: null },
 };
-
-type DateRangeKey = keyof typeof DATE_RANGES;
 
 const COLORS = [
   "#6366f1",
@@ -77,9 +83,20 @@ const SpendingByCategoryChart = ({ transactions, displayCurrency, nprPerUsd }: S
     if (!transactions.length) return [];
 
     const range = DATE_RANGES[dateRange];
+    const now = new Date();
+    
+    if (range.useMonthCalculation) {
+      // Use the same calculation as the card: subMonths(startOfMonth(now), 2)
+      const startDate = subMonths(startOfMonth(now), 2);
+      
+      return transactions.filter((tx) => {
+        const txDate = new Date(tx.date);
+        return txDate >= startDate && txDate <= endOfDay(now);
+      });
+    }
+    
     if (!range.days) return transactions;
 
-    const now = new Date();
     const startDate = startOfDay(subDays(now, range.days));
 
     return transactions.filter((tx) => {
@@ -128,9 +145,9 @@ const SpendingByCategoryChart = ({ transactions, displayCurrency, nprPerUsd }: S
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(DATE_RANGES).map(([key, { label }]) => (
+            {Object.entries(DATE_RANGES).map(([key, value]) => (
               <SelectItem key={key} value={key}>
-                {label}
+                {value.label}
               </SelectItem>
             ))}
           </SelectContent>
